@@ -2,6 +2,7 @@
 #include <benchmark/benchmark.h>
 #include <opencv2/opencv.hpp>
 #include "PixelBoard.h"
+#include "BoardPresenter.h"
 
 void writePixel(cv::Mat  &img, PixelBoard &dst);
 
