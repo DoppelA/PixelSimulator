@@ -11,17 +11,17 @@ static void BM_PixelBoardIni(benchmark::State& state) {
 
     for (auto _ : state) {
         //benchmark::DoNotOptimize(toSort);
-        PixelBoard brd(size, size/*, PixelBoard::pixel::WOOD*/);
+        BoardPresenter brd(size, size, PixelBoard::pixel::WOOD);
     }
 }
 
 static void BM_PixelBoardUpdate(benchmark::State& state) {
     int size = state.range(0);
-    PixelBoard brd(size, size/*,PixelBoard::pixel::WOOD*/);
+    BoardPresenter brd(size, size,PixelBoard::pixel::WOOD);
 
     for (auto _ : state) {
         //benchmark::DoNotOptimize(toSort);
-        brd.updateBoard();
+        brd.updateVisualBoard();
     }
 }
 
@@ -30,12 +30,17 @@ BENCHMARK(BM_PixelBoardIni)->Unit(benchmark::kMillisecond)-> Range(1080, 3840);
 BENCHMARK(BM_PixelBoardUpdate)->Unit(benchmark::kMillisecond)-> Range(1080, 3840);
 
 int main(int argc, char **argv) {
-   //::benchmark::Initialize(&argc, argv);
-   //::benchmark::RunSpecifiedBenchmarks();
-   //::benchmark::Shutdown();
+    //::benchmark::Initialize(&argc, argv);
+    //::benchmark::RunSpecifiedBenchmarks();
+    //::benchmark::Shutdown();
     cv::utils::logging::setLogLevel(cv::utils::logging::LOG_LEVEL_ERROR);
 
-    BoardPresenter pixelsim(850,850);
+    BoardPresenter pixelsim(750,750/*,PixelBoard::pixel::WOOD*/);
+    pixelsim.setAt(20,20,PixelBoard::pixel::FIRE);
+    pixelsim.drawCube(40,40,100,PixelBoard::pixel::SAND);
+
+    pixelsim.showBoard();
+
 
     return 0;
 }

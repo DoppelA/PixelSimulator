@@ -3,13 +3,11 @@
 BoardPresenter::BoardPresenter(uint16_t width, uint16_t height) : width(width) , height(height), livePixelBoard{height, width} {
     cv::Mat temp(width, height, CV_8UC3);
     cvBoard = temp;
-    delay = 5;
 }
 
-BoardPresenter::BoardPresenter(uint16_t width, uint16_t height, uint8_t delay) : width(width) , height(height),delay(delay) , livePixelBoard{width, height} {
+BoardPresenter::BoardPresenter(uint16_t width, uint16_t height, PixelBoard::pixel mat) : width(width) , height(height),delay(delay) , livePixelBoard{width, height, mat} {
     cv::Mat temp(width, height, CV_8UC3);
     cvBoard = temp;
-    delay = 5;
 }
 
 void BoardPresenter::showBoard() {
@@ -24,7 +22,7 @@ void BoardPresenter::showBoard() {
         //switch
         if (key == 'q' || key == 'Q')
             return;
-        else if (key == '-' && delay > 5) {
+        else if (key == '-' && delay - 5 >= 0) {
             delay -= 5;
         } else if (key == '+' && delay < 200) {
             delay += 5;

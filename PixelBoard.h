@@ -32,9 +32,6 @@ private:
     std::vector<std::vector<pixel>> board;
     std::vector<std::vector<pixel>> flipboard;
 
-    //std::vector<pixel> board;
-    //std::vector<pixel> flipboard;
-
     void initReactTable();
     bool flipped = false;
 };
