@@ -1,0 +1,9 @@
+{
+  "name" : "adv-cpp-simpixel",
+  "dependencies" : [ {
+    "name" : "benchmark"
+  }, {
+    "name" : "opencv",
+    "features" : [ "highgui" ]
+  } ]
+}
