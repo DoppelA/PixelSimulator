@@ -14,18 +14,19 @@ public:
     enum class pixel {AIR = 0, WOOD, WATER, SAND, STONE, FIRE, SMOKE, NUM_TYPES};
     enum class actions {NONE = 0, BURN, TURNSMOKE, SOLIDIFY, GO_UP, FALL_DOWN, FIRETICK, EXTINGUISH, FLOW};
 
-    PixelBoard(uint16_t height, uint16_t width);
-    PixelBoard(uint16_t height, uint16_t width, pixel basePixel);
+    PixelBoard(uint16_t width, uint16_t height);
+    PixelBoard(uint16_t width, uint16_t height, pixel basePixel);
     ~PixelBoard() = default;
 
     void setAt(const uint16_t & x,const uint16_t & y, const pixel & toSet);
     void updateBoard();
     void retBoard (std::ostream &os);
-
+    void drawCube(uint16_t x, uint16_t y,uint8_t size, pixel material);
     const pixel getAt(const uint16_t & x,const uint16_t & y);
 
     const uint16_t width;
     const uint16_t height;
+
 private:
     std::vector<std::vector<actions>> reactionTable;
     std::vector<std::vector<pixel>> board;

@@ -1,6 +1,6 @@
 #include "PixelBoard.h"
 
-PixelBoard::PixelBoard(uint16_t height, uint16_t width) : height(height), width (width) {
+PixelBoard::PixelBoard(uint16_t width, uint16_t height) : height(height), width (width) {
     std::vector<std::vector<pixel>> tempBoard(width, std::vector<pixel>(height, pixel::AIR));
     board = tempBoard;
     initReactTable();
@@ -18,9 +18,7 @@ PixelBoard::PixelBoard(uint16_t height, uint16_t width) : height(height), width 
     flipboard = board;
 }
 
-PixelBoard::PixelBoard(uint16_t width, uint16_t height, pixel basePixel) : width (width), height(height) {
-    std::vector<std::vector<pixel>> tempBoard(width, std::vector<pixel>(height, basePixel));
-    board = tempBoard;
+PixelBoard::PixelBoard(uint16_t width, uint16_t height, pixel basePixel) : width (width), height(height), board{width, std::vector<pixel>(height, basePixel)} {
     initReactTable();
     srand(std::time(nullptr));
 
@@ -55,11 +53,12 @@ void PixelBoard::initReactTable() {
     reactionTable[(int)pixel::FIRE][(int)pixel::SMOKE] = actions::FIRETICK;
     reactionTable[(int)pixel::FIRE][(int)pixel::STONE] = actions::FIRETICK;
     reactionTable[(int)pixel::FIRE][(int)pixel::SAND] = actions::FIRETICK;
-    reactionTable[(int)pixel::FIRE][(int)pixel::WATER] = actions::EXTINGUISH;
+    //reactionTable[(int)pixel::FIRE][(int)pixel::WATER] = actions::EXTINGUISH;
     reactionTable[(int)pixel::SAND][(int)pixel::SMOKE] = actions::FALL_DOWN;
     reactionTable[(int)pixel::SAND][(int)pixel::AIR] = actions::FALL_DOWN;
-    reactionTable[(int)pixel::SAND][(int)pixel::FIRE] = actions::FALL_DOWN;
+    //reactionTable[(int)pixel::SAND][(int)pixel::FIRE] = actions::FALL_DOWN;
     reactionTable[(int)pixel::WATER][(int)pixel::AIR] = actions::FALL_DOWN;
+    reactionTable[(int)pixel::WATER][(int)pixel::SMOKE] = actions::FALL_DOWN;
     reactionTable[(int)pixel::SMOKE][(int)pixel::AIR] = actions::GO_UP;
     reactionTable[(int)pixel::SMOKE][(int)pixel::FIRE] = actions::GO_UP;
 }
@@ -83,6 +82,20 @@ void PixelBoard::setAt(const uint16_t & x,const uint16_t & y, const PixelBoard::
     dst[x][y] = toSet;
 }
 
+void PixelBoard::drawCube(uint16_t x, uint16_t y,uint8_t size, pixel material){
+    if ((x + size) < width && (y + size) < height) {
+        for(uint8_t i = 0; i <= size; i++) {
+            //std::cout << i << std::endl;
+            for (uint8_t j = 0; j <= size; j++) {
+                setAt(x + i, y + j, material);
+                //std::cout << j << std::endl;
+            }
+        }
+    }
+    else
+        throw("problem");
+}
+
 void PixelBoard::updateBoard() {
     std::vector<std::vector<bool>> hasMoved(width, std::vector<bool>(height, false));
     const auto& src = flipped ? flipboard : board;
@@ -92,7 +105,7 @@ void PixelBoard::updateBoard() {
     for (uint16_t i = 1; i < width - 1; i++) {
         for (uint16_t j = 1; j < height - 1; j++) {
             const pixel & curPixel = src[i][j];
-            if (curPixel != PixelBoard::pixel::AIR) {
+            if (curPixel != pixel::AIR) {
                 actions curAction;
                 actions lastActiveAction = actions::NONE;
                 uint8_t firetick = 0;
@@ -107,7 +120,7 @@ void PixelBoard::updateBoard() {
 
                     if (curAction == actions::FALL_DOWN && ddy > 0 && !hasMoved[i][j]) {
                         dst[i][j] = hasMoved[i + ddy][j] ? dst[i + ddy][j] : src[i + ddy][j];
-                        dst[i + ddy][j] =  src[i][j];
+                        dst[i + ddy][j] = curPixel;
                         lastActiveAction = actions::FALL_DOWN;
                         hasMoved[i][j] = true;
                         hasMoved[i + ddy][j] = true;
@@ -116,7 +129,7 @@ void PixelBoard::updateBoard() {
 
                     if (curAction == actions::GO_UP && ddy < 0 && !hasMoved[i][j]) {
                         dst[i][j] = hasMoved[i + ddy][j] ? dst[i + ddy][j] : src[i + ddy][j];
-                        dst[i + ddy][j] = src[i][j];
+                        dst[i + ddy][j] = curPixel;
                         lastActiveAction = actions::GO_UP;
                         hasMoved[i][j] = true;
                         hasMoved[i + ddy][j] = true;
@@ -158,6 +171,7 @@ void PixelBoard::updateBoard() {
                         break;
 
                     case actions::NONE:
+                        //break;
                         for (int8_t dxy: arr) {
                             curAction = reactionTable[(int) curPixel][(int) src[i + dxy][j + dxy]];
                             if (curAction == actions::FALL_DOWN && dxy > 0 && !hasMoved[i][j]) {
@@ -169,7 +183,7 @@ void PixelBoard::updateBoard() {
                             }
                             if (curAction == actions::GO_UP && dxy < 0 && !hasMoved[i][j]) {
                                 dst[i][j] = hasMoved[i + dxy][j + dxy] ? dst[i + dxy][j + dxy] : src[i + dxy][j + dxy];
-                                dst[i + dxy][j + dxy] = src[i][j];
+                                dst[i + dxy][j + dxy] = curPixel;
                                 hasMoved[i][j] = true;
                                 hasMoved[i + dxy][j + dxy] = true;
                                 break;
@@ -177,19 +191,20 @@ void PixelBoard::updateBoard() {
                             curAction = reactionTable[(int) curPixel][(int) src[i + (dxy * -1)][j + dxy]];
                             if (curAction == actions::FALL_DOWN && dxy < 0 && !hasMoved[i][j]) {
                                 dst[i][j] = hasMoved[i + (dxy * -1)][j + dxy] ? dst[i + (dxy * -1)][j + dxy] : src[i + (dxy * -1)][j + dxy];
-                                dst[i + (dxy * -1)][j + dxy] = src[i][j];
+                                dst[i + (dxy * -1)][j + dxy] = curPixel;
                                 hasMoved[i][j] = true;
                                 hasMoved[i + (dxy * -1)][j + dxy] = true;
                                 break;
                             }
                             if (curAction == actions::GO_UP && dxy > 0 && !hasMoved[i][j]) {
                                 dst[i][j] = hasMoved[i + (dxy * -1)][j + dxy] ? dst[i + (dxy * -1)][j + dxy] : src[i + (dxy * -1)][j + dxy];
-                                dst[i + (dxy * -1)][j + dxy] = src[i][j];
+                                dst[i + (dxy * -1)][j + dxy] = curPixel;
                                 hasMoved[i][j] = true;
                                 hasMoved[i + (dxy * -1)][j + dxy] = true;
                                 break;
                             }
                         }
+                        break;
 
                     default:
                         if (firetick >= 4 && rand() % 10 >= 3 && !hasMoved[i][j]) {
@@ -200,13 +215,13 @@ void PixelBoard::updateBoard() {
                         }
                 }
                 if (!hasMoved[i][j]) {
-                    dst[i][j] = src[i][j];
+                    dst[i][j] = curPixel;
                     hasMoved[i][j] = true;
                     continue;
                 }
             }
             else
-                dst[i][j] = src[i][j];
+                dst[i][j] = curPixel;
         }
     }
     flipped = !flipped;
