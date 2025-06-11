@@ -8,7 +8,7 @@ BoardPresenter::BoardPresenter(uint16_t width, uint16_t height) : width(width) ,
 
 void BoardPresenter::showBoard() {
     bool pause = false;
-    while (true) {
+    while (true){
         if (!pause)
             updateVisualBoard();
 
