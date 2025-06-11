@@ -32,22 +32,14 @@ int main(int argc, char **argv) {
    //::benchmark::Initialize(&argc, argv);
    //::benchmark::RunSpecifiedBenchmarks();
    //::benchmark::Shutdown();
+    cv::utils::logging::setLogLevel(cv::utils::logging::LOG_LEVEL_ERROR);
 
-    PixelBoard testBoard(300,720, PixelBoard::pixel::WOOD);
-    testBoard.setAt(100,100,PixelBoard::pixel::FIRE);
-    testBoard.setAt(100,120,PixelBoard::pixel::SAND);
-    testBoard.setAt(100,119,PixelBoard::pixel::SAND);
-    testBoard.setAt(101,120,PixelBoard::pixel::SAND);
-    testBoard.setAt(101,119,PixelBoard::pixel::SAND);
-    testBoard.setAt(200,120,PixelBoard::pixel::WATER);
-    testBoard.setAt(200,119,PixelBoard::pixel::WATER);
-    testBoard.setAt(201,120,PixelBoard::pixel::WATER);
-    testBoard.setAt(201,119,PixelBoard::pixel::WATER);
-    testBoard.setAt(202,120,PixelBoard::pixel::WATER);
-    testBoard.setAt(202,119,PixelBoard::pixel::WATER);
-    testBoard.setAt(203,120,PixelBoard::pixel::WATER);
-    testBoard.setAt(203,119,PixelBoard::pixel::WATER);
-    //testBoard.retBoard(std::cout);
+    PixelBoard testBoard(850,850, PixelBoard::pixel::WOOD);
+   testBoard.setAt(100,100,PixelBoard::pixel::FIRE);
+   testBoard.drawCube(101,101,20,PixelBoard::pixel::SAND);
+   //testBoard.drawCube(2,2,2,PixelBoard::pixel::SAND);
+   testBoard.drawCube(201,201,20,PixelBoard::pixel::WATER);
+    testBoard.drawCube(301,301,20,PixelBoard::pixel::SMOKE);
 
     cv::Mat img(testBoard.width, testBoard.height, CV_8UC3);
     uint8_t delay = 6;
@@ -59,6 +51,8 @@ int main(int argc, char **argv) {
         }
 
         cv::imshow("test",img);
+        //std::cout << '\n' << std::endl;
+        //testBoard.retBoard(std::cout);
 
         int key = cv::waitKey(delay);
         if(key == 'q' || key == 'Q') {

@@ -37,8 +37,6 @@ PixelBoard::PixelBoard(uint16_t width, uint16_t height, pixel basePixel) : width
     flipboard = board;
 }
 
-
-
 /*PixelBoard::~PixelBoard() {
 
 }*/
@@ -47,19 +45,14 @@ void PixelBoard::initReactTable() {
     std::vector<std::vector<actions>> tempActions((int)pixel::NUM_TYPES, std::vector<actions>((int)pixel::NUM_TYPES, actions::NONE));
     reactionTable = tempActions;
     reactionTable[(int)pixel::WOOD][(int)pixel::FIRE] = actions::BURN;
-    reactionTable[(int)pixel::WATER][(int)pixel::SMOKE] = actions::FLOW;
     reactionTable[(int)pixel::FIRE][(int)pixel::WATER] = actions::TURNSMOKE;
     //reactionTable[(int)pixel::SAND][(int)pixel::FIRE] = actions::SOLIDIFY;
     reactionTable[(int)pixel::FIRE][(int)pixel::FIRE] = actions::FIRETICK;
     reactionTable[(int)pixel::FIRE][(int)pixel::AIR] = actions::FIRETICK;
     reactionTable[(int)pixel::FIRE][(int)pixel::SMOKE] = actions::FIRETICK;
     reactionTable[(int)pixel::FIRE][(int)pixel::STONE] = actions::FIRETICK;
-    reactionTable[(int)pixel::FIRE][(int)pixel::SAND] = actions::FIRETICK;
-    reactionTable[(int)pixel::FIRE][(int)pixel::WATER] = actions::EXTINGUISH;
     reactionTable[(int)pixel::SAND][(int)pixel::SMOKE] = actions::FALL_DOWN;
     reactionTable[(int)pixel::SAND][(int)pixel::AIR] = actions::FALL_DOWN;
-    reactionTable[(int)pixel::SAND][(int)pixel::FIRE] = actions::FALL_DOWN;
-    reactionTable[(int)pixel::WATER][(int)pixel::AIR] = actions::FALL_DOWN;
     reactionTable[(int)pixel::SMOKE][(int)pixel::AIR] = actions::GO_UP;
     reactionTable[(int)pixel::SMOKE][(int)pixel::FIRE] = actions::GO_UP;
 }
@@ -81,6 +74,20 @@ const PixelBoard::pixel PixelBoard::getAt (const uint16_t & x,const uint16_t & y
 void PixelBoard::setAt(const uint16_t & x,const uint16_t & y, const PixelBoard::pixel & toSet){
     auto & dst = flipped ? flipboard : board;
     dst[x][y] = toSet;
+}
+
+void PixelBoard::drawCube(uint16_t x, uint16_t y,uint8_t size, pixel material){
+    if ((x + size) < width && (y + size) < height) {
+        for(uint8_t i = 0; i <= size; i++) {
+            //std::cout << i << std::endl;
+            for (uint8_t j = 0; j <= size; j++) {
+                setAt(x + i, y + j, material);
+                //std::cout << j << std::endl;
+            }
+        }
+    }
+    else
+        throw("problem");
 }
 
 void PixelBoard::updateBoard() {
@@ -105,17 +112,17 @@ void PixelBoard::updateBoard() {
                     if (curAction == actions::FIRETICK)
                         firetick++;
 
-                    if (curAction == actions::FALL_DOWN && ddy > 0 && !hasMoved[i][j]) {
-                        dst[i][j] = hasMoved[i + ddy][j] ? dst[i + ddy][j] : src[i + ddy][j];
-                        dst[i + ddy][j] =  src[i][j];
+                    if (curAction == actions::FALL_DOWN && ddy > 0 && !hasMoved[i][j] && !hasMoved[i + ddy][j]) {
+                        dst[i][j] = src[i + ddy][j];
+                        dst[i + ddy][j] = src[i][j];
                         lastActiveAction = actions::FALL_DOWN;
                         hasMoved[i][j] = true;
                         hasMoved[i + ddy][j] = true;
                         break;
                     }
 
-                    if (curAction == actions::GO_UP && ddy < 0 && !hasMoved[i][j]) {
-                        dst[i][j] = hasMoved[i + ddy][j] ? dst[i + ddy][j] : src[i + ddy][j];
+                    if (curAction == actions::GO_UP && ddy < 0 && !hasMoved[i][j] && !hasMoved[i + ddy][j]) {
+                        dst[i][j] = src[i + ddy][j];
                         dst[i + ddy][j] = src[i][j];
                         lastActiveAction = actions::GO_UP;
                         hasMoved[i][j] = true;
@@ -132,72 +139,68 @@ void PixelBoard::updateBoard() {
 
                     if (curAction == actions::FIRETICK) firetick++;
                 }
-                if (hasMoved[i][j])
+
+                //switch
+
+                if (lastActiveAction == actions::BURN && !hasMoved[i][j]) {
+                    if (rand() % 10 >= 8)
+                        dst[i][j] = pixel::SMOKE;
+                    else
+                        dst[i][j] = pixel::FIRE;
+
+                    hasMoved[i][j] = true;
                     continue;
+                } else if (firetick >= 4 && rand() % 10 >= 3 && !hasMoved[i][j]) {
+                    //dst[i][j] = pixel::AIR;
+                    dst[i][j] = pixel::FIRE;
+                    hasMoved[i][j] = true;
+                    continue;
+                } else if (lastActiveAction == actions::SOLIDIFY && !hasMoved[i][j]) {
+                    dst[i][j] = pixel::STONE;
+                    hasMoved[i][j] = true;
+                    continue;
+                } else if (lastActiveAction == actions::NONE && !hasMoved[i][j]) {
 
-                switch(lastActiveAction) {
-                    case actions::BURN:
-                        if (rand() % 10 >= 8)
-                            dst[i][j] = pixel::SMOKE;
-                        else
-                            dst[i][j] = pixel::FIRE;
-                        hasMoved[i][j] = true;
-                        //continue;
-                        break;
+                    for (int8_t dxy: arr) {
+                        curAction = reactionTable[(int) curPixel][(int) src[i + dxy][j + dxy]];
 
-                    case actions::SOLIDIFY:
-                        dst[i][j] = pixel::STONE;
-                        hasMoved[i][j] = true;
-                        //continue;
-                        break;
-
-                    case actions::EXTINGUISH:
-                        dst[i][j] = pixel::AIR;
-                        hasMoved[i][j] = true;
-                        //continue;
-                        break;
-
-                    case actions::NONE:
-                        for (int8_t dxy: arr) {
-                            curAction = reactionTable[(int) curPixel][(int) src[i + dxy][j + dxy]];
-                            if (curAction == actions::FALL_DOWN && dxy > 0 && !hasMoved[i][j]) {
-                                dst[i][j] = hasMoved[i + dxy][j + dxy] ? dst[i + dxy][j + dxy] : src[i + dxy][j + dxy];
-                                dst[i + dxy][j + dxy] = src[i][j];
-                                hasMoved[i][j] = true;
-                                hasMoved[i + dxy][j + dxy] = true;
-                                break;
-                            }
-                            if (curAction == actions::GO_UP && dxy < 0 && !hasMoved[i][j]) {
-                                dst[i][j] = hasMoved[i + dxy][j + dxy] ? dst[i + dxy][j + dxy] : src[i + dxy][j + dxy];
-                                dst[i + dxy][j + dxy] = src[i][j];
-                                hasMoved[i][j] = true;
-                                hasMoved[i + dxy][j + dxy] = true;
-                                break;
-                            }
-                            curAction = reactionTable[(int) curPixel][(int) src[i + (dxy * -1)][j + dxy]];
-                            if (curAction == actions::FALL_DOWN && dxy < 0 && !hasMoved[i][j]) {
-                                dst[i][j] = hasMoved[i + (dxy * -1)][j + dxy] ? dst[i + (dxy * -1)][j + dxy] : src[i + (dxy * -1)][j + dxy];
-                                dst[i + (dxy * -1)][j + dxy] = src[i][j];
-                                hasMoved[i][j] = true;
-                                hasMoved[i + (dxy * -1)][j + dxy] = true;
-                                break;
-                            }
-                            if (curAction == actions::GO_UP && dxy > 0 && !hasMoved[i][j]) {
-                                dst[i][j] = hasMoved[i + (dxy * -1)][j + dxy] ? dst[i + (dxy * -1)][j + dxy] : src[i + (dxy * -1)][j + dxy];
-                                dst[i + (dxy * -1)][j + dxy] = src[i][j];
-                                hasMoved[i][j] = true;
-                                hasMoved[i + (dxy * -1)][j + dxy] = true;
-                                break;
-                            }
-                        }
-
-                    default:
-                        if (firetick >= 4 && rand() % 10 >= 3 && !hasMoved[i][j]) {
-                            dst[i][j] = pixel::AIR;
-                            //dst[i][j] = pixel::FIRE;
+                        if (curAction == actions::FALL_DOWN && dxy > 0 && !hasMoved[i][j] &&
+                            !hasMoved[i + dxy][j + dxy]) {
+                            dst[i][j] = src[i + dxy][j + dxy];
+                            dst[i + dxy][j + dxy] = src[i][j];
                             hasMoved[i][j] = true;
-                            continue;
+                            hasMoved[i + dxy][j + dxy] = true;
+                            break;
                         }
+
+                        if (curAction == actions::GO_UP && dxy < 0 && !hasMoved[i][j] && !hasMoved[i + dxy][j + dxy]) {
+                            dst[i][j] = src[i + dxy][j + dxy];
+                            dst[i + dxy][j + dxy] = src[i][j];
+                            hasMoved[i][j] = true;
+                            hasMoved[i + dxy][j + dxy] = true;
+                            break;
+                        }
+
+                        curAction = reactionTable[(int) curPixel][(int) src[i + (dxy * -1)][j + dxy]];
+
+                        if (curAction == actions::FALL_DOWN && dxy < 0 && !hasMoved[i][j] &&
+                            !hasMoved[i + (dxy * -1)][j + dxy]) {
+                            dst[i][j] = src[i + (dxy * -1)][j + dxy];
+                            dst[i + (dxy * -1)][j + dxy] = src[i][j];
+                            hasMoved[i][j] = true;
+                            hasMoved[i + (dxy * -1)][j + dxy] = true;
+                            break;
+                        }
+
+                        if (curAction == actions::GO_UP && dxy > 0 && !hasMoved[i][j] &&
+                            !hasMoved[i + (dxy * -1)][j + dxy]) {
+                            dst[i][j] = src[i + (dxy * -1)][j + dxy];
+                            dst[i + (dxy * -1)][j + dxy] = src[i][j];
+                            hasMoved[i][j] = true;
+                            hasMoved[i + (dxy * -1)][j + dxy] = true;
+                            break;
+                        }
+                    }
                 }
                 if (!hasMoved[i][j]) {
                     dst[i][j] = src[i][j];
