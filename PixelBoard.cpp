@@ -1,6 +1,6 @@
 #include "PixelBoard.h"
 
-PixelBoard::PixelBoard(uint16_t height, uint16_t width) : height(height), width (width), {
+PixelBoard::PixelBoard(uint16_t height, uint16_t width) : height(height), width (width) {
     std::vector<std::vector<pixel>> tempBoard(width, std::vector<pixel>(height, pixel::AIR));
     board = tempBoard;
     initReactTable();
