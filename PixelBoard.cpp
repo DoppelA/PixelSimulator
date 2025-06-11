@@ -1,8 +1,6 @@
 #include "PixelBoard.h"
 
-PixelBoard::PixelBoard(uint16_t width, uint16_t height) : height(height), width (width) {
-    std::vector<std::vector<pixel>> tempBoard(width, std::vector<pixel>(height, pixel::AIR));
-    board = tempBoard;
+PixelBoard::PixelBoard(uint16_t width, uint16_t height) : width (width), height(height), board{width, std::vector<pixel>(height, pixel::AIR)} {
     initReactTable();
     srand(std::time(nullptr));
 
@@ -42,6 +40,9 @@ PixelBoard::PixelBoard(uint16_t width, uint16_t height, pixel basePixel) : width
 }*/
 
 void PixelBoard::initReactTable() {
+    if (reactionTable.size() > 0)
+        return;
+
     std::vector<std::vector<actions>> tempActions((int)pixel::NUM_TYPES, std::vector<actions>((int)pixel::NUM_TYPES, actions::NONE));
     reactionTable = tempActions;
     reactionTable[(int)pixel::WOOD][(int)pixel::FIRE] = actions::BURN;
@@ -224,8 +225,6 @@ void PixelBoard::updateBoard() {
                         if (firetick >= 4 && rand() % 10 >= 3 && !hasMoved[x][y]) {
                             targetPixel = pixel::AIR;
                             //targetPixel = pixel::FIRE;
-                            if (curPixel != pixel::FIRE)
-                            std::cout << (int)curPixel << std::endl;
                             hasMoved[x][y] = true;
                             continue;
                         }

@@ -28,7 +28,7 @@ public:
     const uint16_t height;
 
 private:
-    std::vector<std::vector<actions>> reactionTable;
+    static std::vector<std::vector<actions>> reactionTable;
     std::vector<std::vector<pixel>> board;
     std::vector<std::vector<pixel>> flipboard;
 

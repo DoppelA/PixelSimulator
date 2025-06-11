@@ -6,6 +6,12 @@ BoardPresenter::BoardPresenter(uint16_t width, uint16_t height) : width(width) ,
     delay = 5;
 }
 
+BoardPresenter::BoardPresenter(uint16_t width, uint16_t height, uint8_t delay) : width(width) , height(height),delay(delay) , livePixelBoard{width, height} {
+    cv::Mat temp(width, height, CV_8UC3);
+    cvBoard = temp;
+    delay = 5;
+}
+
 void BoardPresenter::showBoard() {
     bool pause = false;
     while (true){
@@ -85,4 +91,16 @@ void BoardPresenter::updateVisualBoard() {
                     cvBoard.at<cv::Vec3b>(i, j)[2] = ((unsigned char) livePixelBoard.getAt(i, j) * 10);
             }
         }
+}
+
+const PixelBoard::pixel BoardPresenter::getAt (const uint16_t & x,const uint16_t & y) {
+    return livePixelBoard.getAt(x,y);
+}
+
+void BoardPresenter::setAt(const uint16_t & x,const uint16_t & y, const PixelBoard::pixel & toSet){
+    livePixelBoard.setAt(x,y, toSet);
+}
+
+void BoardPresenter::drawCube(uint16_t x, uint16_t y,uint8_t size, PixelBoard::pixel material) {
+    livePixelBoard.drawCube(x,y,size,material);
 }
