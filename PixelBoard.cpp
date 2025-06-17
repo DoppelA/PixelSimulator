@@ -237,8 +237,6 @@ void PixelBoard::updateBoard() {
                 destinationPixel = curPixel;
                 hasMoved[x][y] = true;
                 continue;
-
-
            }
         }
     }
