@@ -56,6 +56,7 @@ void PixelBoard::initReactTable() {
     reactionTable[(int)pixel::SAND][(int)pixel::SMOKE] = actions::FALL_DOWN;
     reactionTable[(int)pixel::SAND][(int)pixel::AIR] = actions::FALL_DOWN;
     reactionTable[(int)pixel::SAND][(int)pixel::FIRE] = actions::FALL_DOWN;
+    //reactionTable[(int)pixel::SAND][(int)pixel::SAND] = actions::FALL_DOWN;
     reactionTable[(int)pixel::WATER][(int)pixel::AIR] = actions::FALL_DOWN;
     reactionTable[(int)pixel::WATER][(int)pixel::SMOKE] = actions::FALL_DOWN;
     reactionTable[(int)pixel::SMOKE][(int)pixel::AIR] = actions::GO_UP;
@@ -123,21 +124,21 @@ void PixelBoard::updateBoard() {
                 if (curAction == actions::FIRETICK)
                     firetick++;
 
-                if (curAction == actions::FALL_DOWN && arrX > 0 && !hasMoved[x][y]) {
+                if (curAction == actions::FALL_DOWN && arrX > 0 && !hasMoved[x][y] && !hasMoved[x + arrX][y]) {
                     destinationPixel = hasMoved[x + arrX][y] ? dst[x + arrX][y] : src[x + arrX][y];
                     //destinationPixel = src[x + arrX][y];
                     dst[x + arrX][y] = curPixel;
-                    lastActiveAction = actions::FALL_DOWN;
-                    hasMoved[x][y] = true;
+                    lastActiveAction = curAction;
+                    //hasMoved[x][y] = true;
                     hasMoved[x + arrX][y] = true;
                     break;
                 }
 
-                else if (curAction == actions::GO_UP && arrX < 0 && !hasMoved[x][y]) {
+                else if (curAction == actions::GO_UP && arrX < 0 && !hasMoved[x][y] && !hasMoved[x + arrX][y]) {
                     destinationPixel = hasMoved[x + arrX][y] ? dst[x + arrX][y] : src[x + arrX][y];
                     dst[x + arrX][y] = curPixel;
-                    lastActiveAction = actions::GO_UP;
-                    hasMoved[x][y] = true;
+                    lastActiveAction = curAction;
+                    //hasMoved[x][y] = true;
                     hasMoved[x + arrX][y] = true;
                     break;
                 }
@@ -178,27 +179,29 @@ void PixelBoard::updateBoard() {
                     //continue;
                     break;
 
-                case actions::NONE:
+                case actions::NONE: /*
                     if (curPixel == pixel::WATER || curPixel == pixel::SMOKE || curPixel == pixel::SAND)
                         for (int8_t dxy: arr) {
                             pixel & tlbrDiagonalTarget = dst[x + dxy][y + dxy];
                             pixel & tlbrDiagonalSource = const_cast<pixel &>(src[x + dxy][y + dxy]);
                             curAction = reactionTable[(int) curPixel][(int)tlbrDiagonalSource];
 
-                            if (curAction == actions::FALL_DOWN && dxy > 0 && !hasMoved[x][y]) {
+                            if (curAction == actions::FALL_DOWN && dxy > 0 && !hasMoved[x][y] && !hasMoved[x + dxy][y + dxy]) {
                                 destinationPixel = hasMoved[x + dxy][y + dxy] ? tlbrDiagonalTarget : tlbrDiagonalSource;
                                 //destinationPixel = tlbrDiagonalSource;
                                 tlbrDiagonalTarget = curPixel;
                                 hasMoved[x][y] = true;
                                 hasMoved[x + dxy][y + dxy] = true;
+                                lastActiveAction = curAction;
                                 break;
                             }
-                            if (curAction == actions::GO_UP && dxy < 0 && !hasMoved[x][y]) {
+                            if (curAction == actions::GO_UP && dxy < 0 && !hasMoved[x][y] && !hasMoved[x + dxy][y + dxy]) {
                                 destinationPixel = hasMoved[x + dxy][y + dxy] ? tlbrDiagonalTarget : tlbrDiagonalSource;
                                 //destinationPixel = tlbrDiagonalSource;
                                 tlbrDiagonalTarget = curPixel;
                                 hasMoved[x][y] = true;
                                 hasMoved[x + dxy][y + dxy] = true;
+                                lastActiveAction = curAction;
                                 break;
                             }
 
@@ -206,23 +209,25 @@ void PixelBoard::updateBoard() {
                             pixel & trblDiagonalSource = const_cast<pixel &>(src[x + dxy][y + (dxy * -1)]);
                             curAction = reactionTable[(int) curPixel][(int)trblDiagonalSource];
 
-                            if (curAction == actions::FALL_DOWN && dxy > 0 && !hasMoved[x][y]) {
+                            if (curAction == actions::FALL_DOWN && dxy > 0 && !hasMoved[x][y] && !hasMoved[x + dxy][y + (dxy * -1)]) {
                                 destinationPixel = hasMoved[x + dxy][y + (dxy * -1)] ? trblDiagonalTarget : trblDiagonalSource;
                                 //destinationPixel = trblDiagonalSource;
                                 trblDiagonalTarget = curPixel;
                                 hasMoved[x][y] = true;
                                 hasMoved[x + dxy][y + (dxy * -1)] = true;
+                                lastActiveAction = curAction;
                                 break;
                             }
-                            if (curAction == actions::GO_UP && dxy < 0 && !hasMoved[x][y]) {
+                            if (curAction == actions::GO_UP && dxy < 0 && !hasMoved[x][y] && !hasMoved[x + dxy][y + (dxy * -1)]) {
                                 destinationPixel = hasMoved[x + dxy][y + (dxy * -1)] ? trblDiagonalTarget : trblDiagonalSource;
                                 //destinationPixel = trblDiagonalSource;
                                 trblDiagonalTarget = curPixel;
                                 hasMoved[x][y] = true;
                                 hasMoved[x + dxy][y + (dxy * -1)] = true;
+                                lastActiveAction = curAction;
                                 break;
                             }
-                        }
+                        } */
                     break;
 
                 default:
@@ -233,7 +238,7 @@ void PixelBoard::updateBoard() {
                         continue;
                     }
             }
-            if (!hasMoved[x][y]) {
+            if (!hasMoved[x][y] && !(lastActiveAction == actions::GO_UP || lastActiveAction == actions::FALL_DOWN)) {
                 destinationPixel = curPixel;
                 hasMoved[x][y] = true;
                 continue;
