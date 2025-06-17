@@ -38,6 +38,7 @@ int main(int argc, char **argv) {
     BoardPresenter pixelsim(750,750/*,PixelBoard::pixel::WOOD*/);
     pixelsim.setAt(20,20,PixelBoard::pixel::FIRE);
     pixelsim.drawCube(40,40,100,PixelBoard::pixel::SAND);
+    pixelsim.drawCube(240,240,100,PixelBoard::pixel::SMOKE);
 
     pixelsim.showBoard();
 

@@ -104,139 +104,142 @@ void PixelBoard::updateBoard() {
     for (uint16_t x = 1; x < width - 1; x++) {
         for (uint16_t y = 1; y < height - 1; y++) {
             const pixel & curPixel = src[x][y];
-            pixel & targetPixel = dst[x][y];
-            if (curPixel != pixel::AIR && curPixel != pixel::STONE) {
-                actions curAction;
-                actions lastActiveAction = actions::NONE;
-                uint8_t firetick = 0;
-                for (int8_t arrX: arr) {
-                    curAction = reactionTable[(int) curPixel][(int) src[x + arrX][y]];
+            pixel & destinationPixel = dst[x][y];
 
-                    if (curAction != actions::NONE && curAction != actions::FALL_DOWN && curAction != actions::GO_UP)
-                        lastActiveAction = curAction;
+            if ((!hasMoved[x][y] && curPixel == pixel::AIR) || (!hasMoved[x][y] && curPixel == pixel::STONE)) {
+                destinationPixel = curPixel;
+                continue;
+            }
 
-                    if (curAction == actions::FIRETICK)
-                        firetick++;
+            actions curAction;
+            actions lastActiveAction = actions::NONE;
+            uint8_t firetick = 0;
+            for (int8_t arrX: arr) {
+                curAction = reactionTable[(int) curPixel][(int) src[x + arrX][y]];
 
-                    if (curAction == actions::FALL_DOWN && arrX > 0 && !hasMoved[x][y]) {
-                        targetPixel = hasMoved[x + arrX][y] ? dst[x + arrX][y] : src[x + arrX][y];
-                        dst[x + arrX][y] = curPixel;
-                        lastActiveAction = actions::FALL_DOWN;
-                        hasMoved[x][y] = true;
-                        hasMoved[x + arrX][y] = true;
-                        break;
-                    }
+                if (curAction != actions::NONE && curAction != actions::FALL_DOWN && curAction != actions::GO_UP)
+                    lastActiveAction = curAction;
 
-                    if (curAction == actions::GO_UP && arrX < 0 && !hasMoved[x][y]) {
-                        targetPixel = hasMoved[x + arrX][y] ? dst[x + arrX][y] : src[x + arrX][y];
-                        dst[x + arrX][y] = curPixel;
-                        lastActiveAction = actions::GO_UP;
-                        hasMoved[x][y] = true;
-                        hasMoved[x + arrX][y] = true;
-                        break;
-                    }
-                }
+                if (curAction == actions::FIRETICK)
+                    firetick++;
 
-                for (int8_t arrY: arr) {
-                    curAction = reactionTable[(int) curPixel][(int) src[x][y + arrY]];
-
-                    if (curAction != actions::NONE && curAction != actions::FALL_DOWN && curAction != actions::GO_UP)
-                        lastActiveAction = curAction;
-
-                    if (curAction == actions::FIRETICK) firetick++;
-                }
-
-                if (hasMoved[x][y])
-                    continue;
-
-                switch(lastActiveAction) {
-                    case actions::BURN:
-                        if (rand() % 10 >= 8)
-                            //targetPixel = (rand() % 10 >= 8) ? pixel::SMOKE : pixel::AIR;
-                            targetPixel = pixel::SMOKE;
-                        else
-                            targetPixel = pixel::FIRE;
-                        hasMoved[x][y] = true;
-                        //continue;
-                        break;
-
-                    case actions::SOLIDIFY:
-                        targetPixel = pixel::STONE;
-                        hasMoved[x][y] = true;
-                        //continue;
-                        break;
-
-                    case actions::EXTINGUISH:
-                        dst[x][y] = pixel::AIR;
-                        hasMoved[x][y] = true;
-                        //continue;
-                        break;
-
-                    case actions::NONE:
-                        if (curPixel == pixel::WATER || curPixel == pixel::SMOKE || curPixel == pixel::SAND)
-                            for (int8_t dxy: arr) {
-
-                                pixel & tlbrDiagonalTarget = dst[x + dxy][y + dxy];
-                                pixel & tlbrDiagonalSource = const_cast<pixel &>(src[x + dxy][y + dxy]);
-                                curAction = reactionTable[(int) curPixel][(int)tlbrDiagonalSource];
-
-                                if (curAction == actions::FALL_DOWN && dxy > 0 && !hasMoved[x][y]) {
-                                    targetPixel = hasMoved[x + dxy][y + dxy] ? tlbrDiagonalTarget : tlbrDiagonalSource;
-                                    //targetPixel = tlbrDiagonalSource;
-                                    tlbrDiagonalTarget = curPixel;
-                                    hasMoved[x][y] = true;
-                                    hasMoved[x + dxy][y + dxy] = true;
-                                    break;
-                                }
-                                if (curAction == actions::GO_UP && dxy < 0 && !hasMoved[x][y]) {
-                                    targetPixel = hasMoved[x + dxy][y + dxy] ? tlbrDiagonalTarget : tlbrDiagonalSource;
-                                    //targetPixel = tlbrDiagonalSource;
-                                    tlbrDiagonalTarget = curPixel;
-                                    hasMoved[x][y] = true;
-                                    hasMoved[x + dxy][y + dxy] = true;
-                                    break;
-                                }
-
-                                pixel & trblDiagonalTarget = dst[x + (dxy * -1)][y + dxy];
-                                pixel & trblDiagonalSource = const_cast<pixel &>(src[x + (dxy * -1)][y + dxy]);
-                                curAction = reactionTable[(int) curPixel][(int)trblDiagonalSource];
-
-                                if (curAction == actions::FALL_DOWN && dxy < 0 && !hasMoved[x][y]) {
-                                    //targetPixel = hasMoved[i + (dxy * -1)][j + dxy] ? trblDiagonalTarget : trblDiagonalSource;
-                                    targetPixel = trblDiagonalSource;
-                                    trblDiagonalTarget = curPixel;
-                                    hasMoved[x][y] = true;
-                                    hasMoved[x + (dxy * -1)][y + dxy] = true;
-                                    break;
-                                }
-                                if (curAction == actions::GO_UP && dxy > 0 && !hasMoved[x][y]) {
-                                    //targetPixel = hasMoved[i + (dxy * -1)][j + dxy] ? trblDiagonalTarget : trblDiagonalSource;
-                                    targetPixel = trblDiagonalSource;
-                                    trblDiagonalTarget = curPixel;
-                                    hasMoved[x][y] = true;
-                                    hasMoved[x + (dxy * -1)][y + dxy] = true;
-                                    break;
-                                }
-                            }
-                        break;
-
-                    default:
-                        if (firetick >= 4 && rand() % 10 >= 3 && !hasMoved[x][y]) {
-                            targetPixel = pixel::AIR;
-                            //targetPixel = pixel::FIRE;
-                            hasMoved[x][y] = true;
-                            continue;
-                        }
-                }
-                if (!hasMoved[x][y]) {
-                    targetPixel = curPixel;
+                if (curAction == actions::FALL_DOWN && arrX > 0 && !hasMoved[x][y]) {
+                    destinationPixel = hasMoved[x + arrX][y] ? dst[x + arrX][y] : src[x + arrX][y];
+                    //destinationPixel = src[x + arrX][y];
+                    dst[x + arrX][y] = curPixel;
+                    lastActiveAction = actions::FALL_DOWN;
                     hasMoved[x][y] = true;
-                    continue;
+                    hasMoved[x + arrX][y] = true;
+                    break;
+                }
+
+                else if (curAction == actions::GO_UP && arrX < 0 && !hasMoved[x][y]) {
+                    destinationPixel = hasMoved[x + arrX][y] ? dst[x + arrX][y] : src[x + arrX][y];
+                    dst[x + arrX][y] = curPixel;
+                    lastActiveAction = actions::GO_UP;
+                    hasMoved[x][y] = true;
+                    hasMoved[x + arrX][y] = true;
+                    break;
                 }
             }
-            else {
-                targetPixel = curPixel;
+
+            for (int8_t arrY: arr) {
+                curAction = reactionTable[(int) curPixel][(int) src[x][y + arrY]];
+
+                if (curAction != actions::NONE && curAction != actions::FALL_DOWN && curAction != actions::GO_UP)
+                    lastActiveAction = curAction;
+
+                if (curAction == actions::FIRETICK) firetick++;
             }
+
+            if (hasMoved[x][y])
+                continue;
+
+            switch(lastActiveAction) {
+                case actions::BURN:
+                    if (rand() % 10 >= 8)
+                        //destinationPixel = (rand() % 10 >= 8) ? pixel::SMOKE : pixel::AIR;
+                        destinationPixel = pixel::SMOKE;
+                    else
+                        destinationPixel = pixel::FIRE;
+                    hasMoved[x][y] = true;
+                    //continue;
+                    break;
+
+                case actions::SOLIDIFY:
+                    destinationPixel = pixel::STONE;
+                    hasMoved[x][y] = true;
+                    //continue;
+                    break;
+
+                case actions::EXTINGUISH:
+                    dst[x][y] = pixel::AIR;
+                    hasMoved[x][y] = true;
+                    //continue;
+                    break;
+
+                case actions::NONE:
+                    if (curPixel == pixel::WATER || curPixel == pixel::SMOKE || curPixel == pixel::SAND)
+                        for (int8_t dxy: arr) {
+                            pixel & tlbrDiagonalTarget = dst[x + dxy][y + dxy];
+                            pixel & tlbrDiagonalSource = const_cast<pixel &>(src[x + dxy][y + dxy]);
+                            curAction = reactionTable[(int) curPixel][(int)tlbrDiagonalSource];
+
+                            if (curAction == actions::FALL_DOWN && dxy > 0 && !hasMoved[x][y]) {
+                                destinationPixel = hasMoved[x + dxy][y + dxy] ? tlbrDiagonalTarget : tlbrDiagonalSource;
+                                //destinationPixel = tlbrDiagonalSource;
+                                tlbrDiagonalTarget = curPixel;
+                                hasMoved[x][y] = true;
+                                hasMoved[x + dxy][y + dxy] = true;
+                                break;
+                            }
+                            if (curAction == actions::GO_UP && dxy < 0 && !hasMoved[x][y]) {
+                                destinationPixel = hasMoved[x + dxy][y + dxy] ? tlbrDiagonalTarget : tlbrDiagonalSource;
+                                //destinationPixel = tlbrDiagonalSource;
+                                tlbrDiagonalTarget = curPixel;
+                                hasMoved[x][y] = true;
+                                hasMoved[x + dxy][y + dxy] = true;
+                                break;
+                            }
+
+                            pixel & trblDiagonalTarget = dst[x + dxy][y + (dxy * -1)];
+                            pixel & trblDiagonalSource = const_cast<pixel &>(src[x + dxy][y + (dxy * -1)]);
+                            curAction = reactionTable[(int) curPixel][(int)trblDiagonalSource];
+
+                            if (curAction == actions::FALL_DOWN && dxy > 0 && !hasMoved[x][y]) {
+                                destinationPixel = hasMoved[x + dxy][y + (dxy * -1)] ? trblDiagonalTarget : trblDiagonalSource;
+                                //destinationPixel = trblDiagonalSource;
+                                trblDiagonalTarget = curPixel;
+                                hasMoved[x][y] = true;
+                                hasMoved[x + dxy][y + (dxy * -1)] = true;
+                                break;
+                            }
+                            if (curAction == actions::GO_UP && dxy < 0 && !hasMoved[x][y]) {
+                                destinationPixel = hasMoved[x + dxy][y + (dxy * -1)] ? trblDiagonalTarget : trblDiagonalSource;
+                                //destinationPixel = trblDiagonalSource;
+                                trblDiagonalTarget = curPixel;
+                                hasMoved[x][y] = true;
+                                hasMoved[x + dxy][y + (dxy * -1)] = true;
+                                break;
+                            }
+                        }
+                    break;
+
+                default:
+                    if (firetick >= 4 && rand() % 10 >= 3 && !hasMoved[x][y]) {
+                        destinationPixel = pixel::AIR;
+                        //destinationPixel = pixel::FIRE;
+                        hasMoved[x][y] = true;
+                        continue;
+                    }
+            }
+            if (!hasMoved[x][y]) {
+                destinationPixel = curPixel;
+                hasMoved[x][y] = true;
+                continue;
+
+
+           }
         }
     }
     flipped = !flipped;

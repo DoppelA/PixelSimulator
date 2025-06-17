@@ -19,7 +19,7 @@ public:
 
 private:
     uint16_t width, height;
-    uint8_t delay = 0;
+    uint8_t delay = 1;
 
     cv::Mat cvBoard;
     PixelBoard livePixelBoard;
