@@ -12,7 +12,7 @@ class PixelBoard {
 //private:
 public:
     enum class pixel {AIR = 0, WOOD, WATER, SAND, STONE, FIRE, SMOKE, NUM_TYPES};
-    enum class actions {NONE = 0, BURN, TURNSMOKE, SOLIDIFY, GO_UP, FALL_DOWN, FIRETICK, EXTINGUISH, FLOW};
+    enum class actions {NONE = 0, BURN, TURNSMOKE, SOLIDIFY, GO_UP, FALL_DOWN, FIRETICK, EXTINGUISH, FLOW, SINK}; //Makros?
 
     PixelBoard(uint16_t width, uint16_t height);
     PixelBoard(uint16_t width, uint16_t height, pixel basePixel);

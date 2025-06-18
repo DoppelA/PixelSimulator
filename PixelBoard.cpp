@@ -56,11 +56,12 @@ void PixelBoard::initReactTable() {
     reactionTable[(int)pixel::SAND][(int)pixel::SMOKE] = actions::FALL_DOWN;
     reactionTable[(int)pixel::SAND][(int)pixel::AIR] = actions::FALL_DOWN;
     reactionTable[(int)pixel::SAND][(int)pixel::FIRE] = actions::FALL_DOWN;
-    //reactionTable[(int)pixel::SAND][(int)pixel::SAND] = actions::FALL_DOWN;
     reactionTable[(int)pixel::WATER][(int)pixel::AIR] = actions::FALL_DOWN;
     reactionTable[(int)pixel::WATER][(int)pixel::SMOKE] = actions::FALL_DOWN;
     reactionTable[(int)pixel::SMOKE][(int)pixel::AIR] = actions::GO_UP;
     reactionTable[(int)pixel::SMOKE][(int)pixel::FIRE] = actions::GO_UP;
+    reactionTable[(int)pixel::SAND][(int)pixel::WATER] = actions::SINK;
+    //reactionTable[(int)pixel::SAND][(int)pixel::WATER] = actions::FALL_DOWN;
 }
 
 void PixelBoard::retBoard (std::ostream &os) {
@@ -99,7 +100,8 @@ void PixelBoard::drawCube(uint16_t x, uint16_t y,uint8_t size, pixel material){
 void PixelBoard::updateBoard() {
     //std::vector<std::vector<uint8_t>> hasMoved(width, std::vector<uint8_t>(height, false));
     std::vector<std::vector<bool>> hasMoved(width, std::vector<bool>(height, false));
-    std::array<int8_t,2> arr = {-1,1};
+    std::array<int8_t,3> arr = {-1, 0, 1};
+    std::array<int8_t,3> arrdiag = {-1, 0, 1};
     const auto& src = flipped ? flipboard : board;
     auto& dst = flipped ? board : flipboard;
 
@@ -123,6 +125,9 @@ void PixelBoard::updateBoard() {
             actions lastActiveAction = actions::NONE;
             uint8_t firetick = 0;
             for (int8_t arrX: arr) {
+                /*for (int8_t arrXY : arrdiag) {
+
+                } */
                 curAction = reactionTable[(int) curPixel][(int) src[x + arrX][y]];
 
                 if (curAction != actions::NONE && curAction != actions::FALL_DOWN && curAction != actions::GO_UP)
@@ -131,23 +136,25 @@ void PixelBoard::updateBoard() {
                 if (curAction == actions::FIRETICK)
                     firetick++;
 
+                if (curAction == actions::SINK && rand() % 2)
+                    curAction = actions::FALL_DOWN;
+                else if (curAction == actions::SINK)
+                    curAction = actions::NONE;
+
                 if (curAction == actions::FALL_DOWN && arrX > 0 && !hasMoved[x][y] && !hasMoved[x + arrX][y]) {
                     destinationPixel = hasMoved[x + arrX][y] ? dst[x + arrX][y] : src[x + arrX][y];
                     //destinationPixel = src[x + arrX][y];
                     dst[x + arrX][y] = curPixel;
                     lastActiveAction = curAction;
-                    //hasMoved[x][y]
-                    // = true;
+                    hasMoved[x][y] = true;
                     hasMoved[x + arrX][y] = true;
                     break;
                 }
-
                 else if (curAction == actions::GO_UP && arrX < 0 && !hasMoved[x][y] && !hasMoved[x + arrX][y]) {
                     destinationPixel = hasMoved[x + arrX][y] ? dst[x + arrX][y] : src[x + arrX][y];
                     dst[x + arrX][y] = curPixel;
                     lastActiveAction = curAction;
-                    //hasMoved[x][y]
-                    // = true;
+                    hasMoved[x][y] = true;
                     hasMoved[x + arrX][y] = true;
                     break;
                 }
@@ -162,7 +169,7 @@ void PixelBoard::updateBoard() {
                 if (curAction == actions::FIRETICK) firetick++;
             }
 
-            if (hasMoved[x][y] )
+            if (hasMoved[x][y])
                 continue;
 
             switch(lastActiveAction) {
@@ -190,52 +197,54 @@ void PixelBoard::updateBoard() {
 
                 case actions::NONE:
                     if (curPixel == pixel::WATER || curPixel == pixel::SMOKE || curPixel == pixel::SAND) {
-                        for (int8_t dxy: arr) {
+                        for (int8_t dxy : arr) {
+
                             pixel &tlbrDiagonalTarget = dst[x + dxy][y + dxy];
                             pixel &tlbrDiagonalSource = const_cast<pixel &>(src[x + dxy][y + dxy]);
                             pixel &trblDiagonalTarget = dst[x + dxy][y + (dxy * -1)];
                             pixel &trblDiagonalSource = const_cast<pixel &>(src[x + dxy][y + (dxy * -1)]);
 
-                            curAction = reactionTable[(int) curPixel][(int) trblDiagonalSource];
-
-                            if (curAction == actions::FALL_DOWN && dxy > 0 && !hasMoved[x][y] && !hasMoved[x + dxy][y + (dxy * -1)]) {
-                                //std::cout << "bottom left" << std::endl;
-                                destinationPixel = hasMoved[x + dxy][y + (dxy * -1)] ? trblDiagonalTarget : trblDiagonalSource;
-                                //destinationPixel = trblDiagonalSource;
-                                trblDiagonalTarget = curPixel;
-                                hasMoved[x][y] = true;
-                                hasMoved[x + dxy][y + (dxy * -1)] = true;
-                                lastActiveAction = curAction;
-                                break;
-                            } else if (curAction == actions::GO_UP && dxy < 0 && !hasMoved[x][y] && !hasMoved[x + dxy][y + (dxy * -1)]) {
-                                //std::cout << "top right" << std::endl;
-                                destinationPixel = hasMoved[x + dxy][y + (dxy * -1)] ? trblDiagonalTarget : trblDiagonalSource;
-                                //destinationPixel = trblDiagonalSource;
-                                trblDiagonalTarget = curPixel;
-                                hasMoved[x][y] = true;
-                                hasMoved[x + dxy][y + (dxy * -1)] = true;
-                                lastActiveAction = curAction;
-                                break;
-                            }
-
                             curAction = reactionTable[(int) curPixel][(int) tlbrDiagonalSource];
 
                             if (curAction == actions::FALL_DOWN && dxy > 0 && !hasMoved[x][y] && !hasMoved[x + dxy][y + dxy]) {
-                                //std::cout << "bottom right" << std::endl;
+                                std::cout << "bottom right" << std::endl;
+
                                 destinationPixel = hasMoved[x + dxy][y + dxy] ? tlbrDiagonalTarget : tlbrDiagonalSource;
-                                //destinationPixel = tlbrDiagonalSource;
                                 tlbrDiagonalTarget = curPixel;
                                 hasMoved[x][y] = true;
                                 hasMoved[x + dxy][y + dxy] = true;
                                 lastActiveAction = curAction;
                                 break;
                             } else if (curAction == actions::GO_UP && dxy < 0 && !hasMoved[x][y] && !hasMoved[x + dxy][y + dxy]) {
-                                //std::cout << "top left" << std::endl;
+                                std::cout << "top left" << std::endl;
+
                                 destinationPixel = hasMoved[x + dxy][y + dxy] ? tlbrDiagonalTarget : tlbrDiagonalSource;
-                                //destinationPixel = tlbrDiagonalSource;
                                 tlbrDiagonalTarget = curPixel;
                                 hasMoved[x][y] = true;
                                 hasMoved[x + dxy][y + dxy] = true;
+                                lastActiveAction = curAction;
+                                break;
+                            }
+
+                            curAction = reactionTable[(int) curPixel][(int) trblDiagonalSource];
+
+                            if (curAction == actions::FALL_DOWN && dxy > 0 && !hasMoved[x][y] && !hasMoved[x + dxy][y + (dxy * -1)]) {
+                                std::cout << "bottom left" << std::endl;
+
+                                destinationPixel = hasMoved[x + dxy][y + (dxy * -1)] ? trblDiagonalTarget : trblDiagonalSource;
+                                trblDiagonalTarget = curPixel;
+                                hasMoved[x][y] = true;
+                                hasMoved[x + dxy][y + (dxy * -1)] = true;
+                                lastActiveAction = curAction;
+                                break;
+                            } else if (curAction == actions::GO_UP && dxy < 0 && !hasMoved[x][y] && !hasMoved[x + dxy][y + (dxy * -1)]) {
+                                std::cout << "top right" << std::endl;
+
+                                destinationPixel = hasMoved[x + dxy][y + (dxy * -1)] ? trblDiagonalTarget : trblDiagonalSource;
+                                destinationPixel = trblDiagonalSource;
+                                trblDiagonalTarget = curPixel;
+                                hasMoved[x][y] = true;
+                                hasMoved[x + dxy][y + (dxy * -1)] = true;
                                 lastActiveAction = curAction;
                                 break;
                             }
@@ -251,7 +260,7 @@ void PixelBoard::updateBoard() {
                         continue;
                     }
             }
-            if (!hasMoved[x][y] && !(lastActiveAction == actions::GO_UP || lastActiveAction == actions::FALL_DOWN)) {
+            if (!hasMoved[x][y]) {
                 destinationPixel = curPixel;
                 hasMoved[x][y] = true;
                 continue;
