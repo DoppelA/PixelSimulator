@@ -35,10 +35,12 @@ int main(int argc, char **argv) {
     //::benchmark::Shutdown();
     cv::utils::logging::setLogLevel(cv::utils::logging::LOG_LEVEL_ERROR);
 
-    BoardPresenter pixelsim(750,750/*,PixelBoard::pixel::WOOD*/);
-    pixelsim.setAt(20,20,PixelBoard::pixel::FIRE);
+    BoardPresenter pixelsim(750,750,PixelBoard::pixel::WOOD);
+    pixelsim.setAt(220,420,PixelBoard::pixel::FIRE);
+    pixelsim.setAt(220,20,PixelBoard::pixel::FIRE);
     pixelsim.drawCube(40,40,100,PixelBoard::pixel::SAND);
     pixelsim.drawCube(240,240,100,PixelBoard::pixel::SMOKE);
+    pixelsim.drawCube(340,40,100,PixelBoard::pixel::WATER);
 
     pixelsim.showBoard();
 

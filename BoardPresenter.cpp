@@ -5,7 +5,7 @@ BoardPresenter::BoardPresenter(uint16_t width, uint16_t height) : width(width) ,
     cvBoard = temp;
 }
 
-BoardPresenter::BoardPresenter(uint16_t width, uint16_t height, PixelBoard::pixel mat) : width(width) , height(height),delay(delay) , livePixelBoard{width, height, mat} {
+BoardPresenter::BoardPresenter(uint16_t width, uint16_t height, PixelBoard::pixel mat) : width(width) , height(height), livePixelBoard{width, height, mat} {
     cv::Mat temp(width, height, CV_8UC3);
     cvBoard = temp;
 }
@@ -13,8 +13,12 @@ BoardPresenter::BoardPresenter(uint16_t width, uint16_t height, PixelBoard::pixe
 void BoardPresenter::showBoard() {
     bool pause = false;
     while (true){
-        if (!pause)
-            updateVisualBoard();
+        if (!pause) {
+            std::thread th1(&BoardPresenter::updateVisualBoard, this);
+            std::thread th2(&BoardPresenter::updateMathBoard, this);
+            th1.join();
+            th2.join();
+        }
 
         cv::imshow("test", cvBoard);
 
@@ -33,8 +37,6 @@ void BoardPresenter::showBoard() {
 }
 
 void BoardPresenter::updateVisualBoard() {
-    livePixelBoard.updateBoard();
-
     for (int i = 0; i < cvBoard.rows; ++i)
         for (int j = 0; j < cvBoard.cols; ++j) {
             int randfac = (i + j) % 10;
@@ -90,6 +92,22 @@ void BoardPresenter::updateVisualBoard() {
             }
         }
 }
+
+void BoardPresenter::RepeatVisualBoard(const bool & pause) {
+    while(!pause)
+        updateVisualBoard();
+}
+
+void BoardPresenter::updateMathBoard() {
+    livePixelBoard.updateBoard();
+}
+
+void BoardPresenter::RepeatMathBoard(const bool & pause) {
+    while(!pause)
+        livePixelBoard.updateBoard();
+}
+
+
 
 const PixelBoard::pixel BoardPresenter::getAt (const uint16_t & x,const uint16_t & y) {
     return livePixelBoard.getAt(x,y);

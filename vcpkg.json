@@ -5,5 +5,5 @@
   }, {
     "name" : "opencv",
     "features" : [ "highgui" ]
-  } ]
+  }]
 }

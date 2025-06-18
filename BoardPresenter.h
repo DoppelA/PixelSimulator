@@ -3,6 +3,7 @@
 
 #include "PixelBoard.h"
 #include <opencv2/opencv.hpp>
+#include <thread>
 
 class BoardPresenter {
 public:
@@ -11,9 +12,12 @@ public:
     //~BoardPresenter() = default;
 
     void updateVisualBoard();
+    void updateMathBoard();
     void BoardPresenter::showBoard();
     void setAt(const uint16_t & x,const uint16_t & y, const PixelBoard::pixel & toSet);
     void drawCube(uint16_t x, uint16_t y,uint8_t size, PixelBoard::pixel material);
+    void RepeatMathBoard(const bool & pause);
+    void RepeatVisualBoard(const bool & pause);
 
     const PixelBoard::pixel getAt (const uint16_t & x,const uint16_t & y);
 
