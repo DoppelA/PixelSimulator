@@ -6,6 +6,8 @@
 #include <iostream>
 #include <sstream>
 #include <ctime>
+#include <random>
+#include <algorithm>
 
 class PixelBoard {
 
