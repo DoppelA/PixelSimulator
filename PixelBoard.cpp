@@ -128,7 +128,7 @@ void PixelBoard::updateBoard() {
             actions curAction;
             actions lastActiveAction = actions::NONE;
             uint8_t firetick = 0;
-           // std::vector<bool> pos(8,false);
+            std::vector<pixel*> pos;
 
             for (int8_t arrX: arr) {
                 for (int8_t arrY : arrdiag) {
