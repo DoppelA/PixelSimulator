@@ -33,6 +33,7 @@ private:
     static std::vector<std::vector<actions>> reactionTable;
     std::vector<std::vector<pixel>> board;
     std::vector<std::vector<pixel>> flipboard;
+    std::minstd_rand lce;
 
     void initReactTable();
     bool flipped = false;

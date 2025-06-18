@@ -109,9 +109,7 @@ void PixelBoard::updateBoard() {
     uint16_t y_end   = flipped ? height - 1 : 0;
     int8_t y_step  = flipped ? 1 : -1;
 
-    std::minstd_rand lce(0);
-
-    std::shuffle(arrdiag.begin(), arrdiag.end(), lce);
+    //std::shuffle(arrdiag.begin(), arrdiag.end(), lce);
     std::shuffle(arr.begin(), arr.end(), lce);
 
     for (uint16_t x = 1; x < width - 1; x++) {
@@ -119,19 +117,19 @@ void PixelBoard::updateBoard() {
         for (int16_t y = y_begin; y != y_end; y += y_step) {
             const pixel & curPixel = src[x][y];
             pixel & destinationPixel = dst[x][y];
-            //uint8_t & curHasMoved = hasMoved[x][y];
 
             if ((!hasMoved[x][y] && curPixel == pixel::AIR) || (!hasMoved[x][y] && curPixel == pixel::STONE)) {
                 destinationPixel = curPixel;
                 continue;
             }
 
-            //std::shuffle(arrdiag.begin(), arrdiag.end(), lce);
+            std::shuffle(arrdiag.begin(), arrdiag.end(), lce);
             //std::shuffle(arr.begin(), arr.end(), lce);
-
             actions curAction;
             actions lastActiveAction = actions::NONE;
             uint8_t firetick = 0;
+           // std::vector<bool> pos(8,false);
+
             for (int8_t arrX: arr) {
                 for (int8_t arrY : arrdiag) {
                     curAction = reactionTable[(int) curPixel][(int) src[x + arrX][y + arrY]];
@@ -165,6 +163,8 @@ void PixelBoard::updateBoard() {
                     }
                 }
             }
+
+
 
             if (hasMoved[x][y])
                 continue;
