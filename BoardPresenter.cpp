@@ -12,6 +12,9 @@ BoardPresenter::BoardPresenter(uint16_t width, uint16_t height, PixelBoard::pixe
 
 void BoardPresenter::showBoard() {
     bool pause = false;
+
+    cv::namedWindow("Pixel Simulator", cv::WINDOW_AUTOSIZE);
+    cv::setMouseCallback("Pixel Simulator", CallBackF, this);
     while (true){
         if (!pause) {
             std::thread th1(&BoardPresenter::updateVisualBoard, this);
@@ -20,18 +23,32 @@ void BoardPresenter::showBoard() {
             th2.join();
         }
 
-        cv::imshow("test", cvBoard);
+        cv::imshow("Pixel Simulator", cvBoard);
 
         int key = cv::waitKey(delay);
-        //switch
-        if (key == 'q' || key == 'Q')
-            return;
-        else if (key == '-' && delay - 5 >= 0) {
-            delay -= 5;
-        } else if (key == '+' && delay < 200) {
-            delay += 5;
-        } else if (key == 'p' || key == 'P') {
-            pause = !pause;
+        switch(key) {
+            case 'q':
+            case 'Q':
+                return;
+
+            case 'P':
+            case 'p':
+                pause = !pause;
+                break;
+
+            case '-':
+                if (delay - 5 >= 0)
+                    delay -= 5;
+                break;
+
+            case '+':
+                delay += 5;
+                break;
+
+            default:
+                if (key >= '0' && key <= ((int)PixelBoard::pixel::NUM_TYPES + 48))
+                    paintMaterial = (PixelBoard::pixel)(key - 48);
+                break;
         }
     }
 }
@@ -119,4 +136,19 @@ void BoardPresenter::setAt(const uint16_t & x,const uint16_t & y, const PixelBoa
 
 void BoardPresenter::drawCube(uint16_t x, uint16_t y,uint8_t size, PixelBoard::pixel material) {
     livePixelBoard.drawCube(x,y,size,material);
+}
+
+void BoardPresenter::CallBackF(int event, int x, int y, int flags, void* Board) {
+    //std::cout<< "test 1" << std::endl;
+    BoardPresenter curBoard = *(BoardPresenter*)Board;
+    if(event == cv::EVENT_LBUTTONDOWN) {
+       curBoard.mouseUp = false;
+    }
+    if (event == cv::EVENT_LBUTTONUP){
+        curBoard.mouseUp = true;
+    }
+    if (!curBoard.mouseUp) {
+        std::cout << "drawing: " << (int)curBoard.paintMaterial << " at: " << std::endl << "x: " << x << " y: " << y << std::endl;
+        curBoard.setAt(x,y,curBoard.paintMaterial);
+    }
 }

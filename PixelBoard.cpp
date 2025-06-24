@@ -41,34 +41,44 @@ PixelBoard::PixelBoard(uint16_t width, uint16_t height, pixel basePixel) : width
 }*/
 
 void PixelBoard::initReactTable() {
-    std::vector<std::vector<actions>> tempActions((int)pixel::NUM_TYPES, std::vector<actions>((int)pixel::NUM_TYPES, actions::NONE));
+    std::vector<std::vector<actions>> tempActions((uint8_t)pixel::NUM_TYPES, std::vector<actions>((uint8_t)pixel::NUM_TYPES, actions::NONE));
     reactionTable = tempActions;
-    reactionTable[(int)pixel::WOOD][(int)pixel::FIRE] = actions::BURN;
-    reactionTable[(int)pixel::WATER][(int)pixel::SMOKE] = actions::FLOW;
-    reactionTable[(int)pixel::FIRE][(int)pixel::WATER] = actions::TURNSMOKE;
-    //reactionTable[(int)pixel::SAND][(int)pixel::FIRE] = actions::SOLIDIFY;
-    reactionTable[(int)pixel::FIRE][(int)pixel::FIRE] = actions::FIRETICK;
-    reactionTable[(int)pixel::FIRE][(int)pixel::AIR] = actions::FIRETICK;
-    reactionTable[(int)pixel::FIRE][(int)pixel::SMOKE] = actions::FIRETICK;
-    reactionTable[(int)pixel::FIRE][(int)pixel::STONE] = actions::FIRETICK;
-    reactionTable[(int)pixel::FIRE][(int)pixel::SAND] = actions::FIRETICK;
-    reactionTable[(int)pixel::FIRE][(int)pixel::WATER] = actions::EXTINGUISH;
-    reactionTable[(int)pixel::SAND][(int)pixel::SMOKE] = actions::FALL_DOWN;
-    reactionTable[(int)pixel::SAND][(int)pixel::AIR] = actions::FALL_DOWN;
-    reactionTable[(int)pixel::SAND][(int)pixel::FIRE] = actions::FALL_DOWN;
-    reactionTable[(int)pixel::WATER][(int)pixel::AIR] = actions::FALL_DOWN;
-    reactionTable[(int)pixel::WATER][(int)pixel::SMOKE] = actions::FALL_DOWN;
-    reactionTable[(int)pixel::SMOKE][(int)pixel::AIR] = actions::GO_UP;
-    reactionTable[(int)pixel::SMOKE][(int)pixel::FIRE] = actions::GO_UP;
-    reactionTable[(int)pixel::SAND][(int)pixel::WATER] = actions::SINK;
-    //reactionTable[(int)pixel::SAND][(int)pixel::WATER] = actions::FALL_DOWN;
+    reactionTable[(uint8_t)pixel::WOOD][(uint8_t)pixel::FIRE] = actions::BURN;
+
+    reactionTable[(uint8_t)pixel::FIRE][(uint8_t)pixel::WATER] = actions::TURNSMOKE;
+
+    //reactionTable[(uint8_t)pixel::SAND][(uint8_t)pixel::FIRE] = actions::SOLIDIFY;
+
+    reactionTable[(uint8_t)pixel::FIRE][(uint8_t)pixel::FIRE] = actions::FIRETICK;
+    reactionTable[(uint8_t)pixel::FIRE][(uint8_t)pixel::AIR] = actions::FIRETICK;
+    reactionTable[(uint8_t)pixel::FIRE][(uint8_t)pixel::SMOKE] = actions::FIRETICK;
+    reactionTable[(uint8_t)pixel::FIRE][(uint8_t)pixel::STONE] = actions::FIRETICK;
+    reactionTable[(uint8_t)pixel::FIRE][(uint8_t)pixel::SAND] = actions::FIRETICK;
+
+    reactionTable[(uint8_t)pixel::FIRE][(uint8_t)pixel::WATER] = actions::EXTINGUISH;
+
+    reactionTable[(uint8_t)pixel::SAND][(uint8_t)pixel::SMOKE] = actions::FALL_DOWN;
+    reactionTable[(uint8_t)pixel::SAND][(uint8_t)pixel::AIR] = actions::FALL_DOWN;
+    reactionTable[(uint8_t)pixel::SAND][(uint8_t)pixel::FIRE] = actions::FALL_DOWN;
+
+    reactionTable[(uint8_t)pixel::WATER][(uint8_t)pixel::AIR] = actions::FLOW;
+    reactionTable[(uint8_t)pixel::WATER][(uint8_t)pixel::SMOKE] = actions::FLOW;
+
+    reactionTable[(uint8_t)pixel::SMOKE][(uint8_t)pixel::AIR] = actions::GO_UP;
+    reactionTable[(uint8_t)pixel::SMOKE][(uint8_t)pixel::FIRE] = actions::GO_UP;
+
+    reactionTable[(uint8_t)pixel::SAND][(uint8_t)pixel::WATER] = actions::SINK;
+
+    reactionTable[(uint8_t)pixel::WATER][(uint8_t)pixel::STONE] = actions::ATOP;
+    reactionTable[(uint8_t)pixel::WATER][(uint8_t)pixel::SAND] = actions::ATOP;
+    reactionTable[(uint8_t)pixel::WATER][(uint8_t)pixel::WATER] = actions::ATOP;
 }
 
 void PixelBoard::retBoard (std::ostream &os) {
     const auto& src = flipped ? flipboard : board;
     for (int i = 0; i < width; i++) {
         for (int j = 0; j < height; j++) {
-            os << (int)src[i][j];
+            os << (uint8_t)src[i][j];
         }
         os << '\n';
     }
@@ -100,8 +110,8 @@ void PixelBoard::drawCube(uint16_t x, uint16_t y,uint8_t size, pixel material){
 void PixelBoard::updateBoard() {
     //std::vector<std::vector<uint8_t>> hasMoved(width, std::vector<uint8_t>(height, false));
     std::vector<std::vector<bool>> hasMoved(width, std::vector<bool>(height, false));
-    std::array<int8_t,3> arr = {-1, 0, 1};
-    std::array<int8_t,3> arrdiag = {-1, 0, 1};
+    std::array<int8_t,3> arr = {0,-1, 1};
+    std::array<int8_t,3> arrdiag = {0, -1, 1};
     const auto& src = flipped ? flipboard : board;
     auto& dst = flipped ? board : flipboard;
 
@@ -109,8 +119,7 @@ void PixelBoard::updateBoard() {
     uint16_t y_end   = flipped ? height - 1 : 0;
     int8_t y_step  = flipped ? 1 : -1;
 
-    //std::shuffle(arrdiag.begin(), arrdiag.end(), lce);
-    std::shuffle(arr.begin(), arr.end(), lce);
+    //std::shuffle(arr.begin(), arr.end(), lce);
 
     for (uint16_t x = 1; x < width - 1; x++) {
         //for (uint16_t y = 1; y < height - 1; y++) {
@@ -123,47 +132,67 @@ void PixelBoard::updateBoard() {
                 continue;
             }
 
-            std::shuffle(arrdiag.begin(), arrdiag.end(), lce);
-            //std::shuffle(arr.begin(), arr.end(), lce);
+            //std::shuffle(arrdiag.begin(), arrdiag.end(), lce);
+            if (rand() % 2) {
+                for (int8_t & i : arrdiag) {
+                    i *= -1;
+                }
+            }
+
+
             actions curAction;
             actions lastActiveAction = actions::NONE;
             uint8_t firetick = 0;
 
             for (int8_t arrX: arr) {
                 for (int8_t arrY : arrdiag) {
-                    curAction = reactionTable[(int) curPixel][(int) src[x + arrX][y + arrY]];
+                    curAction = reactionTable[(uint8_t) curPixel][(uint8_t) src[x + arrX][y + arrY]];
 
-                    if (curAction != actions::NONE && curAction != actions::FALL_DOWN && curAction != actions::GO_UP)
+                    if (curAction != actions::NONE && curAction != actions::FALL_DOWN && curAction != actions::GO_UP && curAction != actions::FLOW)
                         lastActiveAction = curAction;
 
-                    if (curAction == actions::FIRETICK)
+                    if (curAction == actions::FIRETICK) {
                         firetick++;
+                        continue;
+                    }
+
 
                     if (curAction == actions::SINK && rand() % 2)
                         curAction = actions::FALL_DOWN;
                     else if (curAction == actions::SINK)
                         curAction = actions::NONE;
 
-                    if (curAction == actions::FALL_DOWN && arrX > 0 && !hasMoved[x][y] && !hasMoved[x + arrX][y + arrY]) {
-                        destinationPixel = hasMoved[x + arrX][y + arrY] ? dst[x + arrX][y + arrY] : src[x + arrX][y + arrY];
-                        dst[x + arrX][y + arrY] = curPixel;
-                        lastActiveAction = curAction;
-                        hasMoved[x][y] = true;
-                        hasMoved[x + arrX][y + arrY] = true;
-                        break;
-                    }
-                    else if (curAction == actions::GO_UP && arrX < 0 && !hasMoved[x][y] && !hasMoved[x + arrX][y + arrY]) {
-                        destinationPixel = hasMoved[x + arrX][y + arrY] ? dst[x + arrX][y + arrY] : src[x + arrX][y + arrY];
-                        dst[x + arrX][y + arrY] = curPixel;
-                        lastActiveAction = curAction;
-                        hasMoved[x][y] = true;
-                        hasMoved[x + arrX][y + arrY] = true;
-                        break;
+                    if (!hasMoved[x][y] &&!hasMoved[x + arrX][y + arrY]) {
+                        if ((curAction == actions::FALL_DOWN || curAction == actions::FLOW) && arrX > 0) {
+                            destinationPixel = hasMoved[x + arrX][y + arrY] ? dst[x + arrX][y + arrY] : src[x + arrX][y + arrY];
+                            dst[x + arrX][y + arrY] = curPixel;
+                            lastActiveAction = curAction;
+                            hasMoved[x][y] = true;
+                            hasMoved[x + arrX][y + arrY] = true;
+                            break;
+                        } else if (curAction == actions::GO_UP && arrX < 0) {
+                            destinationPixel = hasMoved[x + arrX][y + arrY] ? dst[x + arrX][y + arrY] : src[x + arrX][y + arrY];
+                            dst[x + arrX][y + arrY] = curPixel;
+                            lastActiveAction = curAction;
+                            hasMoved[x][y] = true;
+                            hasMoved[x + arrX][y + arrY] = true;
+                            break;
+                        }
+
+                        else if (curAction == actions::FLOW && arrX == 0) {
+                            actions atopCheck = reactionTable[(uint8_t)curPixel][(uint8_t)src[x + arrX + 1][y + arrY]];
+                            if (atopCheck != actions::ATOP)
+                                break;
+                            //std::cout << "flowin it" << std::endl;
+                            destinationPixel = hasMoved[x + arrX][y + arrY] ? dst[x + arrX][y + arrY] : src[x + arrX][y + arrY];
+                            dst[x + arrX][y + arrY] = curPixel;
+                            hasMoved[x][y] = true;
+                            hasMoved[x + arrX][y + arrY] = true;
+                            break;
+                        }
                     }
                 }
             }
-
-
 
             if (hasMoved[x][y])
                 continue;
@@ -171,7 +200,6 @@ void PixelBoard::updateBoard() {
             switch(lastActiveAction) {
                 case actions::BURN:
                     if (rand() % 10 >= 9)
-                        //destinationPixel = (rand() % 10 >= 8) ? pixel::SMOKE : pixel::AIR;
                         destinationPixel = pixel::SMOKE;
                     else
                         destinationPixel = pixel::FIRE;

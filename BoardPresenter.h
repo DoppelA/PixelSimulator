@@ -21,12 +21,18 @@ public:
 
     const PixelBoard::pixel getAt (const uint16_t & x,const uint16_t & y);
 
+    PixelBoard::pixel paintMaterial = PixelBoard::pixel::AIR;
+
+    bool mouseUp = true;
+
 private:
     uint16_t width, height;
     uint8_t delay = 1;
 
     cv::Mat cvBoard;
     PixelBoard livePixelBoard;
+
+    static void CallBackF(int event, int x, int y, int flags, void* img);
 };
 
 
