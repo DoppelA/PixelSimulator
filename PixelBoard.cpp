@@ -1,3 +1,4 @@
+#include <cassert>
 #include "PixelBoard.h"
 std::vector<std::vector<PixelBoard::actions>> PixelBoard::reactionTable;
 
@@ -90,7 +91,9 @@ const PixelBoard::pixel PixelBoard::getAt (const uint16_t & x,const uint16_t & y
 
 void PixelBoard::setAt(const uint16_t & x,const uint16_t & y, const PixelBoard::pixel & toSet){
     auto & dst = flipped ? flipboard : board;
-    dst[x][y] = toSet;
+    if (x < height && y < width)
+        dst[x][y] = toSet;
+    //std::cout << "drawing at:\nx:" << x << " y: " << y << std::endl;
 }
 
 void PixelBoard::drawCube(uint16_t x, uint16_t y,uint8_t size, pixel material){

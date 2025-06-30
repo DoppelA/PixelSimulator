@@ -35,5 +35,4 @@ private:
     static void CallBackF(int event, int x, int y, int flags, void* img);
 };
 
-
 #endif //ADVCPPSIMPIXEL_BOARDPRESENTER_H
