@@ -22,8 +22,7 @@ static void BM_PixelBoardUpdate(benchmark::State& state) {
     brd.setAt(220,420,PixelBoard::pixel::FIRE);
     brd.setAt(220,20,PixelBoard::pixel::FIRE);
     brd.drawCube(40,40,100,PixelBoard::pixel::SAND);
-    brd.drawCube(240,240,100,PixelBoard::pixel::SMOKE);
-    brd.drawCube(540,40,100,PixelBoard::pixel::WATER);
+    brd.drawCube(100,100,100,PixelBoard::pixel::WATER);
 
 
     for (auto _ : state) {
