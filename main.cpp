@@ -28,8 +28,8 @@ static void BM_PixelBoardUpdate(benchmark::State& state) {
 
     for (auto _ : state) {
         //benchmark::DoNotOptimize(brd);
-        for (int i = 0; i < 10; i++)
-            brd.updateVisualBoard();
+        for (int i = 0; i < 1; i++)
+            brd.updateMathBoard();
     }
 }
 
@@ -38,13 +38,13 @@ BENCHMARK(BM_PixelBoardIni)->Unit(benchmark::kMillisecond)-> Range(1080, 3840);
 BENCHMARK(BM_PixelBoardUpdate)->Unit(benchmark::kMillisecond)-> Range(1080, 3840);
 
 int main(int argc, char **argv) {
-    //::benchmark::Initialize(&argc, argv);
-    //::benchmark::RunSpecifiedBenchmarks();
-    //::benchmark::Shutdown();
+    ::benchmark::Initialize(&argc, argv);
+    ::benchmark::RunSpecifiedBenchmarks();
+    ::benchmark::Shutdown();
 
     cv::utils::logging::setLogLevel(cv::utils::logging::LOG_LEVEL_ERROR);
 
-    BoardPresenter pixelsim(750,750,PixelBoard::pixel::WOOD);
+    BoardPresenter pixelsim(1080 / 4,1920 / 4,PixelBoard::pixel::WOOD);
     pixelsim.setAt(220,420,PixelBoard::pixel::FIRE);
     pixelsim.setAt(220,20,PixelBoard::pixel::FIRE);
     pixelsim.drawCube(40,40,100,PixelBoard::pixel::SAND);

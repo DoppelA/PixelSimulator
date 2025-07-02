@@ -23,7 +23,7 @@ public:
     void setAt(const uint16_t & x,const uint16_t & y, const pixel & toSet);
     void updateBoard();
     void retBoard (std::ostream &os);
-    void drawCube(uint16_t x, uint16_t y,uint8_t size, pixel material);
+    void drawCube(uint16_t x, uint16_t y, uint8_t size, pixel material);
     const pixel getAt(const uint16_t & x,const uint16_t & y);
 
     const uint16_t width;
