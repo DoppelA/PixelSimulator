@@ -94,19 +94,40 @@ void PixelBoard::setAt(const uint16_t & y,const uint16_t & x, const PixelBoard::
 }
 
 void PixelBoard::drawCube(uint16_t y, uint16_t x, uint8_t size, pixel material){
-    if ((y + size) < height && (x + size) < width) {
-        for(uint8_t i = 0; i <= size; i++) {
-            for (uint8_t j = 0; j <= size; j++) {
-                setAt(y + i, x + j, material);
-            }
+    for(uint8_t i = 0; i <= size; i++) {
+        for (uint8_t j = 0; j <= size; j++) {
+            setAt(y + i, x + j, material);
+        }
+    }
+}
+
+void PixelBoard::drawSquare(uint16_t startY, uint16_t startX, uint16_t endY, uint16_t endX, pixel material){
+    uint16_t left, right, top, bottom;
+    if (startX > endX) {
+        left = endX;
+        right = startX;
+    } else {
+        left = startX;
+        right = endX;
+    }
+    if (startY > endY) {
+        top = endY;
+        bottom = startY;
+    } else {
+        top = startY;
+        bottom = endY;
+    }
+    for (uint16_t x = left; x <= right; x++) {
+        for (uint16_t y = top; y <= bottom; y++) {
+            setAt(y,x,material);
         }
     }
 }
 
 void PixelBoard::updateBoard() {
     std::vector<std::vector<bool>> hasMoved(height, std::vector<bool>(width, false));
-    std::array<int8_t,3> arr = {0,-1, 1};
-    std::array<int8_t,3> arrdiag = {0, -1, 1};
+    std::array<int8_t,3> arr = {0,-1, 1}; //sorted array
+    std::array<int8_t,3> arrRand = {0, -1, 1}; //unsorted array
     const auto& src = flipped ? flipboard : board;
     auto& dst = flipped ? board : flipboard;
 
@@ -115,7 +136,7 @@ void PixelBoard::updateBoard() {
     int8_t x_step  = flipped ? 1 : -1;
 
     for (uint16_t y = 1; y < height - 1; y++) {
-        for (int16_t x = x_begin; x != x_end; x += x_step) {
+        for (uint16_t x = x_begin; x != x_end; x += x_step) {
 
             const pixel & curPixel = src[y][x];
             pixel & destinationPixel = dst[y][x];
@@ -126,7 +147,7 @@ void PixelBoard::updateBoard() {
             }
 
             if (rand() % 2) {
-                for (int8_t & i : arrdiag) {
+                for (int8_t & i : arrRand) {
                     i *= -1;
                 }
             }
@@ -137,7 +158,7 @@ void PixelBoard::updateBoard() {
             int8_t flowdirect = 0;
 
             for (int8_t arrY: arr) {
-                for (int8_t arrX : arrdiag) {
+                for (int8_t arrX : arrRand) {
                     curAction = reactionTable[(uint8_t) curPixel][(uint8_t) src[y + arrY][x + arrX]];
 
                     if (curAction != actions::NONE && curAction != actions::FALL_DOWN && curAction != actions::GO_UP && curAction != actions::FLOW && curAction != actions::ATOP)
@@ -210,9 +231,6 @@ void PixelBoard::updateBoard() {
                     hasMoved[y][x] = true;
                     hasMoved[y][x + flowdirect] = true;
                     continue;
-
-                case actions::NONE:
-                break;
 
                 default:
                     if (firetick >= 5 && rand() % 10 >= 3 && !hasMoved[y][x] ) {

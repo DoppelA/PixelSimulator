@@ -47,7 +47,7 @@ void BoardPresenter::showBoard() {
                 break;
 
             default:
-                if (key >= '0' && key <= ((int)PixelBoard::pixel::NUM_TYPES + 47)) // THIS IS MEANT TO BE 47 AND 48, ITS BECAUSE I DONT WANT NUM_TYPES TO BE PAINTED
+                if (key >= '0' && key <= ((int)PixelBoard::pixel::NUM_TYPES + 47)) // THIS IS MEANT TO BE 47 AND 48, ITS BECAUSE I DON'T WANT NUM_TYPES TO BE PAINTED
                     paintMaterial = (PixelBoard::pixel)(key - 48);
                 break;
         }
@@ -139,6 +139,10 @@ void BoardPresenter::drawCube(uint16_t x, uint16_t y,uint8_t size, PixelBoard::p
     livePixelBoard.drawCube(x,y,size,material);
 }
 
+void BoardPresenter::drawSquare(uint16_t startY, uint16_t startX, uint16_t endY, uint16_t endX, PixelBoard::pixel material) {
+    livePixelBoard.drawSquare(startY, startX, endY, endX, material);
+}
+
 void BoardPresenter::CallBackF(int event, int x, int y, int flags, void* Board) {
     //std::cout<< "test 1" << std::endl;
     BoardPresenter *curBoard = (BoardPresenter*)Board;
@@ -149,8 +153,17 @@ void BoardPresenter::CallBackF(int event, int x, int y, int flags, void* Board) 
     else if (event == cv::EVENT_LBUTTONUP){
         curBoard->mouseUp = true;
     }
+    else if (event == cv::EVENT_RBUTTONDOWN) {
+        if (!curBoard->firstCornerSet) {
+            curBoard->squareX = x;
+            curBoard->squareY = y;
+            curBoard->firstCornerSet = true;
+        } else {
+            curBoard->drawSquare(curBoard->squareY,curBoard->squareX,y,x,curBoard->paintMaterial);
+            curBoard->firstCornerSet = false;
+        }
+    }
     if (!curBoard->mouseUp) {
-        //std::cout << "drawing: " << (int)curBoard.paintMaterial << " at: " << std::endl << "x: " << x << " y: " << y << std::endl;
         curBoard->setAt(y,x,curBoard->paintMaterial);
     }
 }
