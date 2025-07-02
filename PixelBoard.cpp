@@ -89,7 +89,7 @@ const PixelBoard::pixel PixelBoard::getAt (const uint16_t & y,const uint16_t & x
 
 void PixelBoard::setAt(const uint16_t & y,const uint16_t & x, const PixelBoard::pixel & toSet){
     auto & dst = flipped ? flipboard : board;
-    if (y < height && x < width && y > 0 && x > 0)
+    if (y < height - 1 && x < width - 1 && y > 1 && x > 1)
         dst[y][x] = toSet;
     //std::cout << "drawing at:\nx:" << x << " y: " << y << std::endl;
 }
@@ -112,14 +112,11 @@ void PixelBoard::updateBoard() {
     const auto& src = flipped ? flipboard : board;
     auto& dst = flipped ? board : flipboard;
 
-    uint16_t x_begin = flipped ? 1 : width - 2;
+    uint16_t x_begin = flipped ? 0 : width - 1;
     uint16_t x_end   = flipped ? width - 1 : 0;
     int8_t x_step  = flipped ? 1 : -1;
 
-    //std::suffle(arr.begin(), arr.end(), lce);
-
     for (uint16_t y = 1; y < height - 1; y++) {
-        //std::cout << y << std::endl;
         for (int16_t x = x_begin; x != x_end; x += x_step) {
 
             const pixel & curPixel = src[y][x];

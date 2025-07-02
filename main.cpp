@@ -28,8 +28,10 @@ static void BM_PixelBoardUpdate(benchmark::State& state) {
 
     for (auto _ : state) {
         //benchmark::DoNotOptimize(brd);
-        for (int i = 0; i < 1; i++)
+        for (int i = 0; i < 1; i++) {
             brd.updateMathBoard();
+            brd.updateVisualBoard();
+        }
     }
 }
 
