@@ -16,6 +16,8 @@ void BoardPresenter::showBoard() {
             std::thread th2(&BoardPresenter::updateMathBoard, this);
             th1.join();
             th2.join();
+            //updateVisualBoard();
+            //updateMathBoard();
             }
 
         imshow(winName,cvBoard);

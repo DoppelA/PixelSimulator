@@ -20,7 +20,7 @@ add_executable(AdvCppSimPixel main.cpp
 )
 
 target_link_libraries(AdvCppSimPixel
-        benchmark::benchmark
-        benchmark::benchmark_main
+        #benchmark::benchmark
+        #benchmark::benchmark_main
         ${OpenCV_LIBS}
 )
