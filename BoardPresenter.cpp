@@ -13,9 +13,9 @@ BoardPresenter::BoardPresenter(uint16_t width, uint16_t height, PixelBoard::pixe
 void BoardPresenter::showBoard() {
     bool pause = false;
 
-    cv::namedWindow("Pixel Simulator", cv::WND_PROP_FULLSCREEN);
-    cv::setWindowProperty("Pixel Simulator", cv::WND_PROP_FULLSCREEN, cv::WINDOW_FULLSCREEN);
-    cv::setMouseCallback("Pixel Simulator", CallBackF, this);
+    cv::namedWindow(winName, cv::WND_PROP_FULLSCREEN);
+    cv::setWindowProperty(winName, cv::WND_PROP_FULLSCREEN, cv::WINDOW_FULLSCREEN);
+    cv::setMouseCallback(winName, CallBackF, this);
     while (true){
         if (!pause) {
             std::thread th1(&BoardPresenter::updateVisualBoard, this);
@@ -24,7 +24,7 @@ void BoardPresenter::showBoard() {
             th2.join();
             }
         //std::thread th3([this](){while(true){cv::imshow("Pixel Simulator", this->cvBoard);}});
-        imshow("Pixel Simulator", this->cvBoard);
+        imshow(winName,cvBoard);
 
         int key = cv::waitKey(delay);
         switch(key) {
@@ -39,7 +39,7 @@ void BoardPresenter::showBoard() {
                 break;
 
             case '-':
-                if (delay - 5 >= 0)
+                if (delay - 5 > 0)
                     delay -= 5;
                 break;
 
@@ -48,7 +48,7 @@ void BoardPresenter::showBoard() {
                 break;
 
             default:
-                if (key >= '0' && key <= ((int)PixelBoard::pixel::NUM_TYPES + 47)) // THIS IS MEANT TO BE 47 AND 48, ITS BECAUSE I DON'T WANT NUM_TYPES TO BE PAINTED
+                if (key >= '0' && key <= ((int)PixelBoard::pixel::NUM_TYPES + 47)) // 47 because Num Types isn't valid to be drawn
                     paintMaterial = (PixelBoard::pixel)(key - 48);
                 break;
         }

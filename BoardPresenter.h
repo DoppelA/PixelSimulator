@@ -29,9 +29,11 @@ public:
 
 private:
     uint16_t width, height;
-    uint8_t delay = 1;
+    uint16_t delay = 1;
 
     cv::Mat cvBoard;
+    std::string winName = "PixelSimulator";
+
     PixelBoard livePixelBoard;
 
     static void CallBackF(int event, int x, int y, int flags, void* img);
