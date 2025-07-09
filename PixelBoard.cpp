@@ -213,7 +213,7 @@ void PixelBoard::updateBoard() {
 
             switch(lastActiveAction) {
                 case actions::BURN:
-                    if (dist_int(engine) >= 8)
+                    if (dist_int(engine) >= 9)
                         destinationPixel = pixel::SMOKE;
                     else
                         destinationPixel = pixel::FIRE;
