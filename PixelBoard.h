@@ -14,18 +14,18 @@ class PixelBoard {
 //private:
 public:
     enum class pixel {AIR = 0, WOOD, WATER, SAND, STONE, FIRE, SMOKE, NUM_TYPES};
-    enum class actions {NONE = 0, BURN, TURNSMOKE, SOLIDIFY, GO_UP, FALL_DOWN, FIRETICK, EXTINGUISH, FLOW, SINK, ATOP}; //Makros?
+    enum class actions {NONE = 0, BURN, SOLIDIFY, GO_UP, FALL_DOWN, FIRETICK, EXTINGUISH, FLOW, SINK, ATOP}; //Makros?
 
-    PixelBoard(uint16_t width, uint16_t height);
-    PixelBoard(uint16_t width, uint16_t height, pixel basePixel);
+    //PixelBoard(uint16_t width, uint16_t height);
+    PixelBoard(uint16_t width, uint16_t height, pixel basePixel = pixel::AIR);
     ~PixelBoard() = default;
 
-    void setAt(const uint16_t & y,const uint16_t & x, const pixel & toSet);
+    void setAt(const uint16_t y,const uint16_t x, const pixel & toSet);
     void updateBoard();
-    void retBoard (std::ostream &os);
-    void drawCube(uint16_t x, uint16_t y, uint8_t size, pixel material);
-    void drawSquare(uint16_t startY, uint16_t startX, uint16_t endY, uint16_t endX, pixel material);
-    const pixel getAt(const uint16_t & y,const uint16_t & x);
+    void printBoard (std::ostream &os) const;
+    void drawCube(const uint16_t x, const uint16_t y, const uint8_t size, const pixel & material);
+    void drawSquare(const uint16_t startY, const uint16_t startX, const uint16_t endY, const uint16_t endX, const pixel & material);
+    const pixel getAt(const uint16_t y,const uint16_t x) const;
 
     const uint16_t width;
     const uint16_t height;

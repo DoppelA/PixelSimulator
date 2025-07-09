@@ -16,7 +16,7 @@ void getScreenResolution(uint32_t &width, uint32_t &height) {
     width = (uint32_t) GetSystemMetrics(SM_CXSCREEN);
     height = (uint32_t) GetSystemMetrics(SM_CYSCREEN);
 #else
-    Display* disp = XOpenDisplay(NULL);
+    Display* disp = XOpenDisplay(nullptr);
     Screen*  scrn = DefaultScreenOfDisplay(disp);
     width  = scrn->width;
     height = scrn->height;
@@ -63,9 +63,9 @@ int main(int argc, char **argv) {
     cv::utils::logging::setLogLevel(cv::utils::logging::LOG_LEVEL_ERROR);
     uint32_t width, height;
     getScreenResolution(width, height);
-    BoardPresenter pixelsim(height / 4,width / 4,PixelBoard::pixel::WOOD);
+    BoardPresenter pixelsim(height / 2,width / 2,PixelBoard::pixel::WOOD);
     pixelsim.setAt(220,220,PixelBoard::pixel::FIRE);
-    pixelsim.setAt(220,20,PixelBoard::pixel::FIRE);
+    pixelsim.setAt(100,20,PixelBoard::pixel::FIRE);
     pixelsim.drawCube(40,40,100,PixelBoard::pixel::SAND);
     pixelsim.drawCube(240,240,100,PixelBoard::pixel::SMOKE);
     pixelsim.drawCube(540,40,100,PixelBoard::pixel::WATER);

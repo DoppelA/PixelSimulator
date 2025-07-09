@@ -2,20 +2,6 @@
 #include "PixelBoard.h"
 std::vector<std::vector<PixelBoard::actions>> PixelBoard::reactionTable;
 
-PixelBoard::PixelBoard(uint16_t height, uint16_t width) : width (width), height(height), board{height, std::vector<pixel>(width, pixel::AIR)} {
-    initReactTable();
-
-    for (uint16_t x = 0; x < width; x++) {
-        board[0][x] = pixel::STONE;
-        board[height - 1][x] = pixel::STONE;
-    }
-    for (uint16_t y = 0; y < height - 1; y++) {
-        board[y][0] = pixel::STONE;
-        board[y][width - 1] = pixel::STONE;
-    }
-    flipboard = board;
-}
-
 PixelBoard::PixelBoard(uint16_t height, uint16_t width, pixel basePixel) : width (width), height(height), board{height, std::vector<pixel>(width, basePixel)} {
     initReactTable();
 
@@ -30,13 +16,12 @@ PixelBoard::PixelBoard(uint16_t height, uint16_t width, pixel basePixel) : width
     flipboard = board;
 }
 
+// PixelBoard::PixelBoard(uint16_t height, uint16_t width) : PixelBoard(height, width, pixel::AIR){}
 
 void PixelBoard::initReactTable() {
     std::vector<std::vector<actions>> tempActions((uint8_t)pixel::NUM_TYPES, std::vector<actions>((uint8_t)pixel::NUM_TYPES, actions::NONE));
     reactionTable = tempActions;
     reactionTable[(uint8_t)pixel::WOOD][(uint8_t)pixel::FIRE] = actions::BURN;
-
-    reactionTable[(uint8_t)pixel::FIRE][(uint8_t)pixel::WATER] = actions::TURNSMOKE;
 
     reactionTable[(uint8_t)pixel::SAND][(uint8_t)pixel::FIRE] = actions::SOLIDIFY;
 
@@ -65,7 +50,7 @@ void PixelBoard::initReactTable() {
     reactionTable[(uint8_t)pixel::WATER][(uint8_t)pixel::WATER] = actions::ATOP;
 }
 
-void PixelBoard::retBoard (std::ostream &os) {
+void PixelBoard::printBoard (std::ostream &os) const {
     const auto& src = flipped ? flipboard : board;
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
@@ -75,18 +60,18 @@ void PixelBoard::retBoard (std::ostream &os) {
     }
 }
 
-const PixelBoard::pixel PixelBoard::getAt (const uint16_t & y,const uint16_t & x) {
+const PixelBoard::pixel PixelBoard::getAt (const uint16_t y,const uint16_t x) const {
     return flipped ? flipboard[y][x] : board[y][x];
 }
 
-void PixelBoard::setAt(const uint16_t & y,const uint16_t & x, const PixelBoard::pixel & toSet){
+void PixelBoard::setAt(const uint16_t y,const uint16_t x, const PixelBoard::pixel & toSet){
     auto & dst = flipped ? flipboard : board;
     if (y < height - 1 && x < width - 1 && y > 0 && x > 0)
         dst[y][x] = toSet;
     //std::cout << "drawing at:\nx:" << x << " y: " << y << std::endl;
 }
 
-void PixelBoard::drawCube(uint16_t y, uint16_t x, uint8_t size, pixel material){
+void PixelBoard::drawCube(const uint16_t y, const uint16_t x, const uint8_t size,const pixel & material){
     for(uint8_t i = 0; i <= size; i++) {
         for (uint8_t j = 0; j <= size; j++) {
             setAt(y + i, x + j, material);
@@ -94,7 +79,7 @@ void PixelBoard::drawCube(uint16_t y, uint16_t x, uint8_t size, pixel material){
     }
 }
 
-void PixelBoard::drawSquare(uint16_t startY, uint16_t startX, uint16_t endY, uint16_t endX, pixel material){
+void PixelBoard::drawSquare(uint16_t startY,const uint16_t startX,const uint16_t endY, const uint16_t endX, const pixel & material){
     uint16_t left, right, top, bottom;
     if (startX > endX) {
         left = endX;
