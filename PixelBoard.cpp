@@ -4,7 +4,6 @@ std::vector<std::vector<PixelBoard::actions>> PixelBoard::reactionTable;
 
 PixelBoard::PixelBoard(uint16_t height, uint16_t width) : width (width), height(height), board{height, std::vector<pixel>(width, pixel::AIR)} {
     initReactTable();
-    srand(std::time(nullptr));
 
     for (uint16_t x = 0; x < width; x++) {
         board[0][x] = pixel::STONE;
@@ -19,7 +18,6 @@ PixelBoard::PixelBoard(uint16_t height, uint16_t width) : width (width), height(
 
 PixelBoard::PixelBoard(uint16_t height, uint16_t width, pixel basePixel) : width (width), height(height), board{height, std::vector<pixel>(width, basePixel)} {
     initReactTable();
-    srand(std::time(nullptr));
 
     for (uint16_t x = 0; x < width; x++) {
         board[0][x] = pixel::STONE;
@@ -88,7 +86,7 @@ const PixelBoard::pixel PixelBoard::getAt (const uint16_t & y,const uint16_t & x
 
 void PixelBoard::setAt(const uint16_t & y,const uint16_t & x, const PixelBoard::pixel & toSet){
     auto & dst = flipped ? flipboard : board;
-    if (y < height - 1 && x < width - 1 && y > 1 && x > 1)
+    if (y < height - 1 && x < width - 1 && y > 0 && x > 0)
         dst[y][x] = toSet;
     //std::cout << "drawing at:\nx:" << x << " y: " << y << std::endl;
 }
@@ -125,7 +123,7 @@ void PixelBoard::drawSquare(uint16_t startY, uint16_t startX, uint16_t endY, uin
 }
 
 void PixelBoard::updateBoard() {
-    std::vector<std::vector<bool>> hasMoved(height, std::vector<bool>(width, false));
+    std::vector<std::vector<bool>> hasMoved(height, std::vector<bool>(width, false)); // Array to safe changes to Pixels (true if pixel has been changed at that location)
     std::array<int8_t,3> arr = {0,-1, 1}; //sorted array
     std::array<int8_t,3> arrRand = {0, -1, 1}; //unsorted array
     const auto& src = flipped ? flipboard : board;
@@ -134,6 +132,13 @@ void PixelBoard::updateBoard() {
     uint16_t x_begin = flipped ? 0 : width - 1;
     uint16_t x_end   = flipped ? width - 1 : 0;
     int8_t x_step  = flipped ? 1 : -1;
+
+    std::random_device rd;
+    std::uniform_int_distribution<int> dist_int(0, 10);
+    std::uniform_int_distribution<int> dist_bool(0, 1);
+    //std::uniform_real_distribution<float> dist_float(0.0, 1.0);
+    std::mt19937 engine{rd()};
+
 
     for (uint16_t y = 1; y < height - 1; y++) {
         for (uint16_t x = x_begin; x != x_end; x += x_step) {
@@ -146,7 +151,7 @@ void PixelBoard::updateBoard() {
                 continue;
             }
 
-            if (rand() % 2) {
+            if (dist_bool(engine)) {
                 for (int8_t & i : arrRand) {
                     i *= -1;
                 }
@@ -169,7 +174,7 @@ void PixelBoard::updateBoard() {
                         continue;
                     }
 
-                    if (curAction == actions::SINK && rand() % 2)
+                    if (curAction == actions::SINK && dist_bool(engine))
                         curAction = actions::FALL_DOWN;
                     else if (curAction == actions::SINK) {
                         curAction = actions::NONE;
@@ -208,7 +213,7 @@ void PixelBoard::updateBoard() {
 
             switch(lastActiveAction) {
                 case actions::BURN:
-                    if (rand() % 10 >= 9)
+                    if (dist_int(engine) >= 8)
                         destinationPixel = pixel::SMOKE;
                     else
                         destinationPixel = pixel::FIRE;
@@ -233,7 +238,7 @@ void PixelBoard::updateBoard() {
                     continue;
 
                 default:
-                    if (firetick >= 5 && rand() % 10 >= 3 && !hasMoved[y][x] ) {
+                    if (firetick >= 5 && dist_int(engine) >= 3 && !hasMoved[y][x] ) {
                         destinationPixel = pixel::AIR;
                         hasMoved[y][x] = true;
                         continue;

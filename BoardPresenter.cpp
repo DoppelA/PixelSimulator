@@ -22,14 +22,15 @@ void BoardPresenter::showBoard() {
             std::thread th2(&BoardPresenter::updateMathBoard, this);
             th1.join();
             th2.join();
-        }
-
-        cv::imshow("Pixel Simulator", cvBoard);
+            }
+        //std::thread th3([this](){while(true){cv::imshow("Pixel Simulator", this->cvBoard);}});
+        imshow("Pixel Simulator", this->cvBoard);
 
         int key = cv::waitKey(delay);
         switch(key) {
             case 'q':
             case 'Q':
+                //th3.join();
                 return;
 
             case 'P':

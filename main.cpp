@@ -3,9 +3,26 @@
 #include <opencv2/opencv.hpp>
 #include "PixelBoard.h"
 #include "BoardPresenter.h"
+#if WIN32
+    #include <windows.h>
+#else
+    #include <X11/Xlib.h>
+#endif
 
-void writePixel(cv::Mat  &img, PixelBoard &dst);
+//...
 
+void getScreenResolution(uint32_t &width, uint32_t &height) {
+#if WIN32
+    width = (uint32_t) GetSystemMetrics(SM_CXSCREEN);
+    height = (uint32_t) GetSystemMetrics(SM_CYSCREEN);
+#else
+    Display* disp = XOpenDisplay(NULL);
+    Screen*  scrn = DefaultScreenOfDisplay(disp);
+    width  = scrn->width;
+    height = scrn->height;
+#endif
+}
+/*
 static void BM_PixelBoardIni(benchmark::State& state) {
     int size = state.range(0);
 
@@ -32,21 +49,22 @@ static void BM_PixelBoardUpdate(benchmark::State& state) {
             brd.updateVisualBoard();
         }
     }
-}
+} */
 
 
-BENCHMARK(BM_PixelBoardIni)->Unit(benchmark::kMillisecond)-> Range(1080, 3840);
-BENCHMARK(BM_PixelBoardUpdate)->Unit(benchmark::kMillisecond)-> Range(1080, 3840);
+// BENCHMARK(BM_PixelBoardIni)->Unit(benchmark::kMillisecond)-> Range(1080, 3840);
+// BENCHMARK(BM_PixelBoardUpdate)->Unit(benchmark::kMillisecond)-> Range(1080, 3840);
 
 int main(int argc, char **argv) {
-    ::benchmark::Initialize(&argc, argv);
+    /*::benchmark::Initialize(&argc, argv);
     ::benchmark::RunSpecifiedBenchmarks();
-    ::benchmark::Shutdown();
+    ::benchmark::Shutdown(); */
 
     cv::utils::logging::setLogLevel(cv::utils::logging::LOG_LEVEL_ERROR);
-
-    BoardPresenter pixelsim(1080 / 4,1920 / 4,PixelBoard::pixel::WOOD);
-    pixelsim.setAt(220,420,PixelBoard::pixel::FIRE);
+    uint32_t width, height;
+    getScreenResolution(width, height);
+    BoardPresenter pixelsim(height / 4,width / 4,PixelBoard::pixel::WOOD);
+    pixelsim.setAt(220,220,PixelBoard::pixel::FIRE);
     pixelsim.setAt(220,20,PixelBoard::pixel::FIRE);
     pixelsim.drawCube(40,40,100,PixelBoard::pixel::SAND);
     pixelsim.drawCube(240,240,100,PixelBoard::pixel::SMOKE);
