@@ -1,11 +1,8 @@
 #include "BoardPresenter.h"
 
-BoardPresenter::BoardPresenter(uint16_t width, uint16_t height) : width(width) , height(height), livePixelBoard{height, width}, cvBoard{width, height, CV_8UC3} {
-;
-}
+//BoardPresenter::BoardPresenter(uint16_t width, uint16_t height) : width(width) , height(height), livePixelBoard{height, width}, cvBoard{width, height, CV_8UC3} {}
 
-BoardPresenter::BoardPresenter(uint16_t width, uint16_t height, PixelBoard::pixel mat) : width(width) , height(height), livePixelBoard{width, height, mat}, cvBoard{width, height, CV_8UC3}{
-}
+BoardPresenter::BoardPresenter(uint16_t width, uint16_t height, PixelBoard::pixel mat) : width(width) , height(height), livePixelBoard{width, height, mat}, cvBoard{width, height, CV_8UC3}{}
 
 void BoardPresenter::showBoard() {
     bool pause = false;
@@ -44,8 +41,8 @@ void BoardPresenter::showBoard() {
                 break;
 
             default:
-                if (key >= '0' && key <= (static_cast<uchar>(PixelBoard::pixel::NUM_TYPES) + 47)) // 47 because Num Types isn't valid to be drawn
-                    paintMaterial = static_cast<PixelBoard::pixel>(key - 48);
+                if (key >= '0' && key <= (static_cast<uchar>(PixelBoard::pixel::NUM_TYPES) + ('0' - 1)))
+                    paintMaterial = static_cast<PixelBoard::pixel>(key - '0');
                 break;
         }
     }

@@ -7,8 +7,8 @@
 
 class BoardPresenter {
 public:
-    BoardPresenter(uint16_t width, uint16_t height);
-    BoardPresenter(uint16_t width, uint16_t height, PixelBoard::pixel mat);
+    //BoardPresenter(uint16_t width, uint16_t height);
+    BoardPresenter(uint16_t width, uint16_t height, PixelBoard::pixel mat = PixelBoard::pixel::AIR);
     //~BoardPresenter() = default;
 
     void updateVisualBoard();
