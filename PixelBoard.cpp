@@ -31,11 +31,6 @@ PixelBoard::PixelBoard(uint16_t height, uint16_t width, pixel basePixel) : width
 }
 
 
-
-/*PixelBoard::~PixelBoard() {
-
-}*/
-
 void PixelBoard::initReactTable() {
     std::vector<std::vector<actions>> tempActions((uint8_t)pixel::NUM_TYPES, std::vector<actions>((uint8_t)pixel::NUM_TYPES, actions::NONE));
     reactionTable = tempActions;

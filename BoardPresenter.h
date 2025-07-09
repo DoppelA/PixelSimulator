@@ -13,7 +13,7 @@ public:
 
     void updateVisualBoard();
     void updateMathBoard();
-    void BoardPresenter::showBoard();
+    void showBoard();
     void setAt(const uint16_t & x,const uint16_t & y, const PixelBoard::pixel & toSet);
     void drawCube(uint16_t x, uint16_t y,uint8_t size, PixelBoard::pixel material);
     void drawSquare(uint16_t startY, uint16_t startX, uint16_t endY, uint16_t endX, PixelBoard::pixel material);

@@ -1,13 +1,10 @@
 #include "BoardPresenter.h"
 
-BoardPresenter::BoardPresenter(uint16_t width, uint16_t height) : width(width) , height(height), livePixelBoard{height, width} {
-    cv::Mat temp(width, height, CV_8UC3);
-    cvBoard = temp;
+BoardPresenter::BoardPresenter(uint16_t width, uint16_t height) : width(width) , height(height), livePixelBoard{height, width}, cvBoard{width, height, CV_8UC3} {
+;
 }
 
-BoardPresenter::BoardPresenter(uint16_t width, uint16_t height, PixelBoard::pixel mat) : width(width) , height(height), livePixelBoard{width, height, mat} {
-    cv::Mat temp(width, height, CV_8UC3);
-    cvBoard = temp;
+BoardPresenter::BoardPresenter(uint16_t width, uint16_t height, PixelBoard::pixel mat) : width(width) , height(height), livePixelBoard{width, height, mat}, cvBoard{width, height, CV_8UC3}{
 }
 
 void BoardPresenter::showBoard() {
@@ -23,14 +20,13 @@ void BoardPresenter::showBoard() {
             th1.join();
             th2.join();
             }
-        //std::thread th3([this](){while(true){cv::imshow("Pixel Simulator", this->cvBoard);}});
+
         imshow(winName,cvBoard);
 
         int key = cv::waitKey(delay);
         switch(key) {
             case 'q':
             case 'Q':
-                //th3.join();
                 return;
 
             case 'P':
@@ -48,8 +44,8 @@ void BoardPresenter::showBoard() {
                 break;
 
             default:
-                if (key >= '0' && key <= ((int)PixelBoard::pixel::NUM_TYPES + 47)) // 47 because Num Types isn't valid to be drawn
-                    paintMaterial = (PixelBoard::pixel)(key - 48);
+                if (key >= '0' && key <= (static_cast<uchar>(PixelBoard::pixel::NUM_TYPES) + 47)) // 47 because Num Types isn't valid to be drawn
+                    paintMaterial = static_cast<PixelBoard::pixel>(key - 48);
                 break;
         }
     }
@@ -74,7 +70,7 @@ void BoardPresenter::updateVisualBoard() {
                     break;
 
                 case PixelBoard::pixel::STONE:
-                    cvBoard.at<cv::Vec3b>(y, x)[0] = 100 + randfac;
+                    cvBoard.at<cv::Vec3b>(y, x)[0] = (100 + randfac);
                     cvBoard.at<cv::Vec3b>(y, x)[1] = 100 + randfac;
                     cvBoard.at<cv::Vec3b>(y, x)[2] = 100 + randfac;
                     break;
@@ -105,9 +101,9 @@ void BoardPresenter::updateVisualBoard() {
                     break;
 
                 default:
-                    cvBoard.at<cv::Vec3b>(y, x)[0] = ((unsigned char) livePixelBoard.getAt(y, x) * 10);
-                    cvBoard.at<cv::Vec3b>(y, x)[1] = ((unsigned char) livePixelBoard.getAt(y, x) * 10);
-                    cvBoard.at<cv::Vec3b>(y, x)[2] = ((unsigned char) livePixelBoard.getAt(y, x) * 10);
+                    cvBoard.at<cv::Vec3b>(y, x)[0] = (static_cast<uchar>(livePixelBoard.getAt(y, x)) * 10);
+                    cvBoard.at<cv::Vec3b>(y, x)[1] = (static_cast<uchar>(livePixelBoard.getAt(y, x)) * 10);
+                    cvBoard.at<cv::Vec3b>(y, x)[2] = (static_cast<uchar>(livePixelBoard.getAt(y, x)) * 10);
             }
         }
 }
@@ -125,8 +121,6 @@ void BoardPresenter::RepeatMathBoard(const bool & pause) {
     while(!pause)
         livePixelBoard.updateBoard();
 }
-
-
 
 const PixelBoard::pixel BoardPresenter::getAt (const uint16_t & x,const uint16_t & y) {
     return livePixelBoard.getAt(x,y);
